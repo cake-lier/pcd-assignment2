@@ -2,11 +2,13 @@ package it.unibo.pcd.assignment2.executors.controller.impl;
 
 import it.unibo.pcd.assignment2.executors.controller.Controller;
 import it.unibo.pcd.assignment2.executors.controller.executor.SuspendableThreadPoolExecutor;
-import it.unibo.pcd.assignment2.executors.controller.tasks.UpdateSinkTask;
+import it.unibo.pcd.assignment2.executors.controller.tasks.UpdateConsumerTask;
 import it.unibo.pcd.assignment2.executors.model.entities.impl.SourcePathsImpl;
 import it.unibo.pcd.assignment2.executors.model.pipes.WordCounter;
 import it.unibo.pcd.assignment2.executors.model.pipes.impl.WordCounterImpl;
+import it.unibo.pcd.assignment2.executors.model.shared.CompletedFlag;
 import it.unibo.pcd.assignment2.executors.model.shared.SuspendedFlag;
+import it.unibo.pcd.assignment2.executors.model.shared.impl.CompletedFlagImpl;
 import it.unibo.pcd.assignment2.executors.model.shared.impl.SuspendedFlagImpl;
 import it.unibo.pcd.assignment2.executors.model.tasks.DocumentLoaderTask;
 import it.unibo.pcd.assignment2.executors.model.tasks.DocumentSplitterTask;
@@ -29,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class ControllerImpl implements Controller {
     private static final int TOTAL_THREADS = Math.round(Runtime.getRuntime().availableProcessors() * 1.0f * (1 + 1.093f));
     private static final int MILLIS_BETWEEN_FRAMES = Math.round(1000.0f / 60.0f);
+    public static final int INITIAL_DELAY_MILLIS = 0;
 
     private final View view;
     private final Executor executor;
@@ -47,6 +50,7 @@ public class ControllerImpl implements Controller {
     @Override
     public void launch(final Path filesDirectory, final Path stopwordsFile, final int wordsNumber) {
         final ScheduledExecutorService timerExecutor = Executors.newSingleThreadScheduledExecutor();
+        final CompletedFlag completedFlag = new CompletedFlagImpl();
         final WordCounter wordCounter = new WordCounterImpl(wordsNumber);
         CompletableFuture
             .supplyAsync(() -> new SourcePathsImpl(filesDirectory, stopwordsFile), this.executor)
@@ -72,10 +76,10 @@ public class ControllerImpl implements Controller {
                      .toArray(CompletableFuture[]::new)),
                 this.executor
             )
-            .thenRunAsync(wordCounter::close, this.executor)
+            .thenRunAsync(completedFlag::setComplete, this.executor)
             .whenCompleteAsync((unused, t) -> this.view.displayError(t.getMessage()), this.executor);
-        timerExecutor.scheduleAtFixedRate(new UpdateSinkTask(timerExecutor, wordCounter, this.view),
-                                          0,
+        timerExecutor.scheduleAtFixedRate(new UpdateConsumerTask(timerExecutor, wordCounter, completedFlag, this.view),
+                                          INITIAL_DELAY_MILLIS,
                                           MILLIS_BETWEEN_FRAMES,
                                           TimeUnit.MILLISECONDS);
     }

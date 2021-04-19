@@ -21,11 +21,4 @@ public interface WordCounter {
      * @param value the value to add to the pipeline
      */
     void enqueue(Update value);
-
-    /**
-     * It closes this pipeline, waking up all tasks waiting for dequeueing an element.
-     */
-    void close();
-
-    boolean isClosed();
 }
