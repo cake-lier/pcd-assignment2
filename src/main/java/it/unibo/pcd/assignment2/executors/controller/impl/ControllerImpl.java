@@ -1,12 +1,12 @@
 package it.unibo.pcd.assignment2.executors.controller.impl;
 
 import it.unibo.pcd.assignment2.executors.controller.Controller;
+import it.unibo.pcd.assignment2.executors.controller.executor.PausableExecutor;
+import it.unibo.pcd.assignment2.executors.controller.executor.PausableExecutorImpl;
 import it.unibo.pcd.assignment2.executors.controller.tasks.UpdateSinkTask;
 import it.unibo.pcd.assignment2.executors.model.entities.impl.SourcePathsImpl;
 import it.unibo.pcd.assignment2.executors.model.pipes.WordCounter;
 import it.unibo.pcd.assignment2.executors.model.pipes.impl.WordCounterImpl;
-import it.unibo.pcd.assignment2.executors.model.shared.AgentSuspendedFlag;
-import it.unibo.pcd.assignment2.executors.model.shared.impl.AgentSuspendedFlagImpl;
 import it.unibo.pcd.assignment2.executors.model.tasks.DocumentLoaderTask;
 import it.unibo.pcd.assignment2.executors.model.tasks.DocumentSplitterTask;
 import it.unibo.pcd.assignment2.executors.model.tasks.PathLoaderTask;
@@ -17,7 +17,6 @@ import it.unibo.pcd.assignment2.executors.view.View;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,8 +29,7 @@ public class ControllerImpl implements Controller {
     private static final int MILLIS_BETWEEN_FRAMES = Math.round(1000.0f / 60.0f);
 
     private final View view;
-    private final AgentSuspendedFlag suspendedFlag;
-    private final Executor taskExecutor;
+    private final PausableExecutor taskExecutor;
 
     /**
      * Default constructor.
@@ -39,8 +37,7 @@ public class ControllerImpl implements Controller {
      */
     public ControllerImpl(final View view) {
         this.view = Objects.requireNonNull(view);
-        this.suspendedFlag = new AgentSuspendedFlagImpl();
-        this.taskExecutor = Executors.newFixedThreadPool(TOTAL_THREADS - 1);
+        this.taskExecutor = new PausableExecutorImpl(TOTAL_THREADS - 1);
     }
 
     @Override
@@ -81,12 +78,12 @@ public class ControllerImpl implements Controller {
 
     @Override
     public void suspend() {
-        this.suspendedFlag.setSuspended();
+        this.taskExecutor.pause();
     }
 
     @Override
     public void resume() {
-        this.suspendedFlag.setRunning();
+        this.taskExecutor.resume();
     }
 
     @Override
