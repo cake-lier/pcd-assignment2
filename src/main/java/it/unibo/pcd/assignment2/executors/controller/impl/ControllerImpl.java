@@ -1,7 +1,7 @@
 package it.unibo.pcd.assignment2.executors.controller.impl;
 
 import it.unibo.pcd.assignment2.executors.controller.Controller;
-import it.unibo.pcd.assignment2.executors.controller.executor.SuspendableThreadPoolExecutor;
+import it.unibo.pcd.assignment2.executors.controller.executor.SuspendableForkJoinPool;
 import it.unibo.pcd.assignment2.executors.controller.tasks.UpdateConsumerTask;
 import it.unibo.pcd.assignment2.executors.model.entities.impl.SourcePathsImpl;
 import it.unibo.pcd.assignment2.executors.model.pipes.WordCounter;
@@ -44,7 +44,7 @@ public class ControllerImpl implements Controller {
     public ControllerImpl(final View view) {
         this.view = Objects.requireNonNull(view);
         this.suspendedFlag = new SuspendedFlagImpl();
-        this.executor = new SuspendableThreadPoolExecutor(TOTAL_THREADS - 1, this.suspendedFlag);
+        this.executor = new SuspendableForkJoinPool(TOTAL_THREADS - 1, this.suspendedFlag);
     }
 
     @Override
@@ -53,21 +53,21 @@ public class ControllerImpl implements Controller {
         final CompletedFlag completedFlag = new CompletedFlagImpl();
         final WordCounter wordCounter = new WordCounterImpl(wordsNumber);
         CompletableFuture
-            .supplyAsync(() -> new SourcePathsImpl(filesDirectory, stopwordsFile), this.executor)
+            .completedFuture(new SourcePathsImpl(filesDirectory, stopwordsFile))
             .thenApplyAsync(new PathLoaderTask(), this.executor)
             .thenComposeAsync(
                 d -> CompletableFuture.allOf(
                     d.getPDFFiles()
                      .stream()
                      .map(p -> CompletableFuture
-                         .supplyAsync(() -> p, this.executor)
+                         .completedFuture(p)
                          .thenApplyAsync(new DocumentLoaderTask(), this.executor)
                          .thenApplyAsync(new DocumentSplitterTask(), this.executor)
                          .thenComposeAsync(
                              pgs -> CompletableFuture.allOf(
                                  pgs.stream()
                                     .map(pg -> CompletableFuture
-                                        .supplyAsync(() -> pg, this.executor)
+                                        .completedFuture(pg)
                                         .thenApplyAsync(new WordCountingTask(d.getStopwords()), this.executor)
                                         .thenAcceptAsync(new WordEnqueueingTask(wordCounter), this.executor))
                                     .toArray(CompletableFuture[]::new)),
