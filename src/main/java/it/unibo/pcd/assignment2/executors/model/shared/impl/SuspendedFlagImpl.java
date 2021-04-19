@@ -1,15 +1,15 @@
 package it.unibo.pcd.assignment2.executors.model.shared.impl;
 
-import it.unibo.pcd.assignment2.executors.model.shared.AgentSuspendedFlag;
+import it.unibo.pcd.assignment2.executors.model.shared.SuspendedFlag;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * An implementation of the {@link AgentSuspendedFlag} interface.
+ * An implementation of the {@link SuspendedFlag} interface.
  */
-public class AgentSuspendedFlagImpl implements AgentSuspendedFlag {
+public class SuspendedFlagImpl implements SuspendedFlag {
     private final Lock lock;
     private final Condition suspendedCondition;
     private boolean isRunning;
@@ -17,15 +17,12 @@ public class AgentSuspendedFlagImpl implements AgentSuspendedFlag {
     /**
      * Default constructor.
      */
-    public AgentSuspendedFlagImpl() {
+    public SuspendedFlagImpl() {
         this.lock = new ReentrantLock();
         this.suspendedCondition = this.lock.newCondition();
         this.isRunning = true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void check() {
         this.lock.lock();
@@ -33,16 +30,13 @@ public class AgentSuspendedFlagImpl implements AgentSuspendedFlag {
             while (!this.isRunning) {
                 try {
                     this.suspendedCondition.await();
-                } catch (InterruptedException ignored) {}
+                } catch (final InterruptedException ignored) {}
             }
         } finally {
             this.lock.unlock();
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setSuspended() {
         this.lock.lock();
@@ -53,9 +47,6 @@ public class AgentSuspendedFlagImpl implements AgentSuspendedFlag {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setRunning() {
         this.lock.lock();

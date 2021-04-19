@@ -3,7 +3,7 @@ package it.unibo.pcd.assignment2.executors.model.shared;
 /**
  * A settable flag that allows tasks to check whether their execution should continue or should be suspended.
  */
-public interface AgentSuspendedFlag {
+public interface SuspendedFlag {
     /**
      * It checks if the executions should continue or should be suspended. This method is blocking if the state of the flag is set
      * to "suspended".
