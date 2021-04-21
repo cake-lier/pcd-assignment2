@@ -1,103 +1,111 @@
 package it.unibo.pcd.assignment2.eventdriven
 
 trait TrainsAPI {
-    type StationName
-    type TrainCode
-    type PlatformName
-    type TrainType <: Enumeration
+  type StationName
+  type TrainCode
+  type PlatformName
+  type TrainType <: Enumeration
 
-    trait Train {
-        def trainCode: TrainCode
+  trait Train {
+    def trainCode: TrainCode
 
-        def trainType: TrainType
-    }
+    def trainType: TrainType
+  }
 
-    trait Station {
-        def stationName: StationName
-    }
+  trait Station {
+    def stationName: StationName
+  }
 
-    import java.time.{Duration, LocalDateTime}
+  import java.time.{Duration, LocalDateTime}
+  
+  trait SolutionStation extends Station {
+    def datetime: LocalDateTime
+  }
 
-    trait Solution {
-        trait SolutionStation extends Station {
-            def datetime: LocalDateTime
-        }
+  trait Solution {
+    def trains: List[Train]
 
-        def trains: List[Train]
+    def price: Option[Double]
 
-        def price: Option[Double]
+    def bookable: Boolean
 
-        def bookable: Boolean
+    def saleable: Boolean
 
-        def saleable: Boolean
+    def departureStation: SolutionStation
 
-        def departureStation: SolutionStation
+    def arrivalStation: SolutionStation
 
-        def arrivalStation: SolutionStation
+    def totalTravelTime: Duration =
+      Duration.between(this.departureStation.datetime, this.arrivalStation.datetime)
+  }
 
-        def totalTravelTime: Duration =
-            Duration.between(this.departureStation.datetime, this.arrivalStation.datetime)
-    }
+  object TravelStateEnum extends Enumeration {
+    type State = Value
 
-    trait TravelState extends Enumeration {
-        def name: String
+    val NOT_DEPARTED, ARRIVED, IN_TIME, DELAYED, EARLY = Value
+  }
 
-        def delay: Option[Int]
-    }
+  trait TravelState {
+    import TravelStateEnum.State
 
-    trait TrainInfo {
-        trait RouteStation extends Station {
-            def plannedDatetime: LocalDateTime
+    def state: State
 
-            def actualDatetime: Option[LocalDateTime]
+    def delay: Option[Int]
+  }
 
-            def plannedPlatform: PlatformName
+  sealed trait RouteStation extends Station {
+    def plannedDatetime: LocalDateTime
 
-            def actualPlatform: Option[PlatformName]
-        }
+    def actualDatetime: Option[LocalDateTime]
 
-        trait RouteDepartureStation extends RouteStation
+    def plannedPlatform: PlatformName
 
-        trait RouteArrivalStation extends RouteStation {
-            def estimatedDatetime: Option[LocalDateTime]
-        }
+    def actualPlatform: Option[PlatformName]
+  }
 
-        def train: Train
+  trait RouteDepartureStation extends RouteStation
 
-        def state: TravelState
+  trait RouteArrivalStation extends RouteStation {
+    def estimatedDatetime: Option[LocalDateTime]
+  }
 
-        def departureStation: RouteDepartureStation
+  trait TrainInfo {
+    def train: Train
 
-        def arrivalStation: RouteArrivalStation
-    }
+    def state: TravelState
 
-    trait TrainBoardRecord {
-        def train: Train
+    def departureStation: RouteDepartureStation
 
-        def station: Station
+    def arrivalStation: RouteArrivalStation
+  }
 
-        def state: TravelState
+  trait TrainBoardRecord {
+    def train: Train
 
-        def datetime: LocalDateTime
+    def station: Station
 
-        def expectedPlatform: Option[PlatformName]
+    def state: TravelState
 
-        def actualPlatform: Option[PlatformName]
-    }
+    def datetime: LocalDateTime
 
-    trait StationInfo {
-        def departures: Set[TrainBoardRecord]
+    def expectedPlatform: Option[PlatformName]
 
-        def arrivals: Set[TrainBoardRecord]
-    }
+    def actualPlatform: Option[PlatformName]
+  }
 
-    import scala.concurrent.Future
+  trait StationInfo {
+    def departures: Set[TrainBoardRecord]
 
-    def getTrainSolutions(departureStation: StationName,
-                          arrivalStation: StationName,
-                          datetimeDeparture: LocalDateTime): Future[List[Solution]]
+    def arrivals: Set[TrainBoardRecord]
+  }
 
-    def getTrainInfo(trainCode: TrainCode): Future[TrainInfo]
+  import scala.concurrent.Future
 
-    def getStationInfo(stationName: StationName): Future[StationInfo]
+  def getTrainSolutions(departureStation: StationName,
+              arrivalStation: StationName,
+              datetimeDeparture: LocalDateTime): Future[List[Solution]]
+
+  def getTrainInfo(trainCode: TrainCode): Future[TrainInfo]
+
+  def getStationInfo(stationName: StationName): Future[StationInfo]
 }
