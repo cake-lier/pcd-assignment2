@@ -4,7 +4,7 @@ trait TrainsAPI {
   type StationName
   type TrainCode
   type PlatformName
-  type TrainType <: Enumeration
+  type TrainType
 
   trait Train {
     def trainCode: TrainCode

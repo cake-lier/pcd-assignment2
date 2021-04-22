@@ -1,5 +1,9 @@
 package it.unibo.pcd.assignment2.eventdriven
 
+import it.unibo.pcd.assignment2
+import it.unibo.pcd.assignment2.eventdriven
+import it.unibo.pcd.assignment2.eventdriven.TrenitaliaAPI.TrainTypeEnum.TrainTypeEnum
+
 import java.time.LocalDateTime
 import scala.concurrent.Future
 
@@ -9,9 +13,20 @@ object TrenitaliaAPI extends TrainsAPI {
   override type PlatformName = String
   override type TrainType = TrainTypeEnum
 
-  class TrainTypeEnum extends Enumeration {
-    type TrainType = Value
-    val Regionale, RegionaleVeloce, InterCity, InterCityNotte, FrecciaBianca, FrecciaArgento, FrecciaRossa = Value
+  object TrainTypeEnum{
+    sealed abstract class TrainTypeEnum(val name:String){
+      override def toString: String = name
+    }
+    case object REGIONALE extends TrainTypeEnum("Regionale")
+    case object REGIONALE_VELOCE extends TrainTypeEnum("RegionaleVeloce")
+    case object INTER_CITY extends TrainTypeEnum("Intercity")
+    case object INTER_CITY_NOTTE extends TrainTypeEnum("IntercityNotte")
+    case object FRECCIA_BIANCA extends TrainTypeEnum("FrecciaBianca")
+    case object FRECCIA_ARGENTO extends TrainTypeEnum("FrecciaArgento")
+    case object FRECCIA_ROSSA extends TrainTypeEnum("FrecciaRossa")
+
+    val trainTypes:Set[TrainTypeEnum] = Set(REGIONALE,REGIONALE_VELOCE,INTER_CITY,
+      INTER_CITY_NOTTE,FRECCIA_BIANCA, FRECCIA_ARGENTO, FRECCIA_ROSSA)
   }
 
   object TravelState {
@@ -70,7 +85,7 @@ object TrenitaliaAPI extends TrainsAPI {
 
   override def getStationInfo(stationName: StationName): Future[StationInfo] = ???
 
-  private[TrenitaliaAPI] object Implementations {
+  object Implementations {
     object Train {
       private case class TrainImpl(trainCode: TrainCode, trainType: TrainType) extends Train
 
