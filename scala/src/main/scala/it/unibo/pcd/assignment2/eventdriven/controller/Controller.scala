@@ -17,7 +17,6 @@ sealed trait Controller {
 
 object Controller {
   import io.vertx.core.{AbstractVerticle, Promise, Vertx}
-  import it.unibo.pcd.assignment2.eventdriven.WebClient
 
   private class ControllerImpl extends AbstractVerticle with Controller {
     var model: Option[TrenitaliaAPI] = None

@@ -1,4 +1,4 @@
-package it.unibo.pcd.assignment2.eventdriven
+package it.unibo.pcd.assignment2.eventdriven.controller
 
 import io.vertx.core.{Future, MultiMap}
 import io.vertx.ext.web.client.HttpResponse
@@ -11,21 +11,21 @@ sealed trait WebClient {
 
 object WebClient {
   import io.vertx.core.Vertx
-  import io.vertx.ext.web.client.{WebClient => VertxWebClient}
   import io.vertx.core.buffer.Buffer
-  import scala.language.implicitConversions
+  import io.vertx.ext.web.client.{WebClient => VertxWebClient}
+
   import scala.jdk.CollectionConverters._
 
   private case class WebClientImpl(vertx: Vertx) extends WebClient {
     val webClient: VertxWebClient = VertxWebClient.create(vertx)
 
     override def get(host: String, requestURI: String): Future[String] =
-      webClient.get(host, requestURI).send()
+      fromResponseToBody(webClient.get(host, requestURI).send())
 
     override def post(host: String, requestURI: String, body: Map[String, String]): Future[String] =
-      webClient.post(host, requestURI).sendForm(MultiMap.caseInsensitiveMultiMap().addAll(body.asJava))
+      fromResponseToBody(webClient.post(host, requestURI).sendForm(MultiMap.caseInsensitiveMultiMap().addAll(body.asJava)))
 
-    private implicit def responseToBody(req: Future[HttpResponse[Buffer]]): Future[String] =
+    private def fromResponseToBody(req: Future[HttpResponse[Buffer]]): Future[String] =
       req.compose(res => Future.succeededFuture(res.bodyAsString))
   }
 

@@ -7,5 +7,3 @@ import scalafx.application.JFXApp.PrimaryStage
 object Main extends JFXApp {
   View(new PrimaryStage)
 }
-
-

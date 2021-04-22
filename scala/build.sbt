@@ -2,12 +2,6 @@ name := "assignment2"
 version := "0.1"
 scalaVersion := "2.13.5"
 
-libraryDependencies ++= Seq(
-    "io.vertx" % "vertx-core" % "4.0.3",
-    "io.vertx" % "vertx-web-client" % "4.0.3",
-    "org.scalafx" %% "scalafx" % "16.0.0-R22"
-)
-
 lazy val javaFXModules = {
   lazy val osName = System.getProperty("os.name") match {
     case n if n.startsWith("Linux") => "linux"
@@ -19,4 +13,10 @@ lazy val javaFXModules = {
     .map(m => "org.openjfx" % s"javafx-$m" % "16" classifier osName)
 }
 
-libraryDependencies ++= javaFXModules
+libraryDependencies ++= Seq(
+    "io.vertx" % "vertx-core" % "4.0.3",
+    "io.vertx" % "vertx-web-client" % "4.0.3",
+    "org.scalafx" %% "scalafx" % "16.0.0-R22",
+    "com.typesafe.play" %% "play-json" % "2.10.0-RC2",
+    "net.ruippeixotog" %% "scala-scraper" % "2.2.0"
+) ++ javaFXModules
