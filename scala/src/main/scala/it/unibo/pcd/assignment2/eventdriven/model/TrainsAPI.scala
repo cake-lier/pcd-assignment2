@@ -7,7 +7,7 @@ trait TrainsAPI {
   type TrainType
 
   type Train <: {
-    def trainCode: TrainCode
+    def trainCode: Option[TrainCode]
 
     def trainType: TrainType
   }

@@ -45,7 +45,7 @@ object TrenitaliaAPI {
     override def getTrainSolutions(departureStation: StationName,
                                    arrivalStation: StationName,
                                    datetimeDeparture: LocalDateTime): Future[List[Solution]] = {
-      val host = "https://www.lefrecce.it"
+      val host = "www.lefrecce.it"
       val requestURI = s"/msite/api/solutions?origin=$departureStation&destination=$arrivalStation&arflag=A" +
                        s"&adate=${datetimeDeparture.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}" +
                        s"&atime=${datetimeDeparture.getHour}&adultno=1&childno=0&direction=A&frecce=false&onlyRegional=false"

@@ -31,13 +31,19 @@ object SolutionsParser extends SolutionsParser {
 
   private def fromJsonToTrain(json: JsLookupResult): List[Train] = {
     val trainIdKey = "trainidentifier"
+    val trainCodePattern = ".* ([0-9]+)$".r
+    val trainTypePattern = "^([a-zA-Z]+) .*".r
     json.as[List[JsValue]]
         .map(t => Train(
-          (t \ trainIdKey).as[String],
-          TrainType.values
-                   .toList
-                   .find(_.toString == (t \ trainIdKey).as[String].replaceAll("[^a-zA-Z]", ""))
-                   .get
+          (t \ trainIdKey).as[String] match {
+            case trainCodePattern(trainCode) => Some(trainCode)
+            case _ => None
+          },
+          (t \ trainIdKey).as[String] match {
+            case trainTypePattern(trainType) =>
+              TrainType.values.toList.find(_.toString == trainType.toUpperCase).getOrElse(TrainType.OTHER)
+            case _ => TrainType.OTHER
+          }
         ))
   }
 }
