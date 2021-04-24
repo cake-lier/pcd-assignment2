@@ -21,8 +21,7 @@ object SolutionsParser extends SolutionsParser {
         .as[List[JsValue]]
         .map(o => Solution(
           fromJsonToTrain(o \ trainListKey),
-          (o \ priceKey).asOpt[Double],
-          (o \ bookableKey).as[Boolean],
+          Some((o \ priceKey).as[Double]).filter(_ > 0),
           (o \ saleableKey).as[Boolean],
           SolutionStation((o \ originKey).as[String], (o \ departureTimeKey).as[Long]),
           SolutionStation((o \ destinationKey).as[String], (o \ arrivalTimeKey).as[Long])
@@ -32,7 +31,7 @@ object SolutionsParser extends SolutionsParser {
   private def fromJsonToTrain(json: JsLookupResult): List[Train] = {
     val trainIdKey = "trainidentifier"
     val trainCodePattern = ".* ([0-9]+)$".r
-    val trainTypePattern = "^([a-zA-Z]+) .*".r
+    val trainTypePattern = "^([a-zA-Z]+ [a-zA-Z]+|[a-zA-Z]+) .*".r
     json.as[List[JsValue]]
         .map(t => Train(
           (t \ trainIdKey).as[String] match {
@@ -41,8 +40,8 @@ object SolutionsParser extends SolutionsParser {
           },
           (t \ trainIdKey).as[String] match {
             case trainTypePattern(trainType) =>
-              TrainType.values.toList.find(_.toString == trainType.toUpperCase).getOrElse(TrainType.OTHER)
-            case _ => TrainType.OTHER
+              TrainType.values.toList.find(_.toString == trainType.replace(" ", "_").toUpperCase).getOrElse(TrainType.AUTOBUS)
+            case _ => TrainType.AUTOBUS
           }
         ))
   }

@@ -29,8 +29,6 @@ trait TrainsAPI {
 
     def bookable: Boolean
 
-    def saleable: Boolean
-
     def departureStation: SolutionStation
 
     def arrivalStation: SolutionStation

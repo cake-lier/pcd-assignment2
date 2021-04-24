@@ -9,8 +9,6 @@ sealed trait Solution {
 
   def bookable: Boolean
 
-  def saleable: Boolean
-
   def departureStation: SolutionStation
 
   def arrivalStation: SolutionStation
@@ -22,20 +20,17 @@ object Solution {
   private case class SolutionImpl(trains: List[Train],
                                   price: Option[Double],
                                   bookable: Boolean,
-                                  saleable: Boolean,
                                   departureStation: SolutionStation,
                                   arrivalStation: SolutionStation) extends Solution
 
   def apply(trains: List[Train],
             price: Option[Double],
             bookable: Boolean,
-            saleable: Boolean,
             departureStation: SolutionStation,
             arrivalStation: SolutionStation): Solution =
     SolutionImpl(trains: List[Train],
                  price: Option[Double],
                  bookable: Boolean,
-                 saleable: Boolean,
                  departureStation: SolutionStation,
                  arrivalStation: SolutionStation)
 }
