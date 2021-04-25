@@ -29,7 +29,9 @@ object TrainBoardCard {
     @FXML
     private var trainBoardDelay: Label = _
     @FXML
-    private var trainBoardPlatforms: Label = _
+    private var trainBoardPlannedPlatform: Label = _
+    @FXML
+    private var trainBoardExpectedPlatform: Label = _
 
     val loader = new FXMLLoader
     loader.setController(this)
@@ -50,10 +52,8 @@ object TrainBoardCard {
         "In orario"
       }
     )
-    trainBoardPlatforms.setText(
-      s"${trainBoardRecord.expectedPlatform.map(p => s"Binario programmato: $p ").getOrElse("")}" +
-      s"${trainBoardRecord.actualPlatform.map(p => s"Binario effettivo: $p").getOrElse("")}"
-    )
+    trainBoardPlannedPlatform.setText(s"Binario programmato: ${trainBoardRecord.expectedPlatform.getOrElse("--")}")
+    trainBoardExpectedPlatform.setText(s"Binario effettivo: ${trainBoardRecord.actualPlatform.getOrElse("--")}")
 
     override val pane: Pane = root
   }

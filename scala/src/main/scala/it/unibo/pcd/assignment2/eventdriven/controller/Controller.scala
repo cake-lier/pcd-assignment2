@@ -56,12 +56,8 @@ object Controller {
 
     override def stopTrainInfoUpdates(trainCode: String): Unit = getVertx.cancelTimer(updates(trainCode))
 
-    override def startStationInfoUpdates(stationName: String): Unit = {
+    override def startStationInfoUpdates(stationName: String): Unit =
       model.foreach(m => startUpdates(stationName, m.getStationInfo, view.displayStationInfo))
-      /*view.displayStationInfo(StationInfo(Set(TrainBoardRecord(Train(Some("771"), TrainType.INTERCITY), Station("Bologna " +
-          "Centrale"), TravelState.Delayed(5), LocalTime.now(), Some("3"), Some("2"))),
-        Set()))*/
-    }
 
     override def stopStationInfoUpdates(stationName: String): Unit = getVertx.cancelTimer(updates(stationName))
 

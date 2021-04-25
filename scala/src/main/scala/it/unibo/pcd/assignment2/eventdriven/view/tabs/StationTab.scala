@@ -5,9 +5,8 @@ import it.unibo.pcd.assignment2.eventdriven.model.StationInfo
 import it.unibo.pcd.assignment2.eventdriven.view.LoadingLabel
 import it.unibo.pcd.assignment2.eventdriven.view.cards.{TrainBoardCard, TrainBoardCardType}
 import javafx.fxml.{FXML, FXMLLoader}
-import javafx.scene.control.{Button, Tab, TitledPane}
+import javafx.scene.control.{Button, ScrollPane, Tab, TextField}
 import scalafx.application.Platform
-import javafx.scene.control.TextField
 import scalafx.scene.layout.VBox
 
 sealed trait StationTab {
@@ -28,9 +27,9 @@ object StationTab {
     @FXML
     private var stopMonitorStation: Button = _
     @FXML
-    private var arrivals: TitledPane = _
+    private var arrivals: ScrollPane = _
     @FXML
-    private var departures: TitledPane = _
+    private var departures: ScrollPane = _
 
     val loader = new FXMLLoader
     loader.setController(this)
@@ -55,8 +54,9 @@ object StationTab {
       val departuresContainer = new VBox(5)
       departures.setContent(departuresContainer)
       departuresContainer.children
-                         .setAll(stationInfo.departures.map(r => TrainBoardCard(r, TrainBoardCardType.DEPARTURE)).map(_.pane)
-                             .toSeq: _*)
+                         .setAll(stationInfo.departures.map(r => TrainBoardCard(r, TrainBoardCardType.DEPARTURE))
+                                                       .map(_.pane)
+                                                       .toSeq: _*)
     })
   }
 
