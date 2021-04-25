@@ -63,7 +63,7 @@ trait TrainsAPI {
 
     def departureStation: RouteDepartureStation
 
-    def arrivalStation: RouteArrivalStation
+    def arrivalStations: List[RouteArrivalStation]
   }
 
   import java.time.LocalTime

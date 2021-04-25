@@ -7,18 +7,18 @@ sealed trait TrainInfo {
 
   def departureStation: RouteDepartureStation
 
-  def arrivalStation: RouteArrivalStation
+  def arrivalStations: List[RouteArrivalStation]
 }
 
 object TrainInfo {
   private case class TrainInfoImpl(train: Train,
                                    state: TravelState,
                                    departureStation: RouteDepartureStation,
-                                   arrivalStation: RouteArrivalStation) extends TrainInfo
+                                   arrivalStations: List[RouteArrivalStation]) extends TrainInfo
 
   def apply(train: Train,
             state: TravelState,
             departureStation: RouteDepartureStation,
-            arrivalStation: RouteArrivalStation): TrainInfo =
-    TrainInfoImpl(train, state, departureStation, arrivalStation)
+            arrivalStations: List[RouteArrivalStation]): TrainInfo =
+    TrainInfoImpl(train, state, departureStation, arrivalStations)
 }
