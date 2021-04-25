@@ -1,6 +1,6 @@
 package it.unibo.pcd.assignment2.eventdriven.model
 
-import java.time.LocalDateTime
+import java.time.LocalTime
 
 sealed trait TrainBoardRecord {
   def train: Train
@@ -9,7 +9,7 @@ sealed trait TrainBoardRecord {
 
   def state: TravelState
 
-  def datetime: LocalDateTime
+  def time: LocalTime
 
   def expectedPlatform: Option[String]
 
@@ -20,15 +20,15 @@ object TrainBoardRecord {
   private case class TrainBoardRecordImpl(train: Train,
                                           station: Station,
                                           state: TravelState,
-                                          datetime: LocalDateTime,
+                                          time: LocalTime,
                                           expectedPlatform: Option[String],
                                           actualPlatform: Option[String]) extends TrainBoardRecord
 
   def apply(train: Train,
             station: Station,
             state: TravelState,
-            datetime: LocalDateTime,
+            time: LocalTime,
             expectedPlatform: Option[String],
             actualPlatform: Option[String]): TrainBoardRecord =
-    TrainBoardRecordImpl(train, station, state, datetime, expectedPlatform, actualPlatform)
+    TrainBoardRecordImpl(train, station, state, time, expectedPlatform, actualPlatform)
 }

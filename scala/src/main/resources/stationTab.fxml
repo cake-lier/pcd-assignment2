@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<!--<TabPane xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">-->
+<Tab fx:id="root" closable="false" text="Stato stazione" xmlns="https://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+        <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <top>
+                <GridPane hgap="5.0" BorderPane.alignment="CENTER">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="70.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="15.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="15.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints percentHeight="45.0" vgrow="SOMETIMES" />
+                        <RowConstraints percentHeight="55.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" />
+                    </padding>
+                    <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Nome stazione" />
+                    <TextField fx:id="stationName" GridPane.rowIndex="1" />
+                    <Button fx:id="startMonitorStation" defaultButton="true" maxHeight="1.7976931348623157E308"
+                            maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Monitora" GridPane.columnIndex="1"
+                            GridPane.rowIndex="1" />
+                    <Button fx:id="stopMonitorStation" cancelButton="true" disable="true" maxHeight="1.7976931348623157E308"
+                            maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Ferma" GridPane.columnIndex="2"
+                            GridPane.rowIndex="1" />
+                </GridPane>
+            </top>
+            <center>
+                <Accordion maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
+                    <panes>
+                        <TitledPane fx:id="departures" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                                    text="Partenze" />
+                        <TitledPane fx:id="arrivals" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                                    text="Arrivi" />
+                    </panes>
+                </Accordion>
+            </center>
+        </BorderPane>
+    </AnchorPane>
+</Tab>
+<!--</TabPane>-->

@@ -66,6 +66,8 @@ trait TrainsAPI {
     def arrivalStation: RouteArrivalStation
   }
 
+  import java.time.LocalTime
+
   type TrainBoardRecord <: {
     def train: Train
 
@@ -73,7 +75,7 @@ trait TrainsAPI {
 
     def state: TravelState
 
-    def datetime: LocalDateTime
+    def time: LocalTime
 
     def expectedPlatform: Option[PlatformName]
 

@@ -1,4 +1,4 @@
-package it.unibo.pcd.assignment2.eventdriven.view
+package it.unibo.pcd.assignment2.eventdriven.view.cards
 
 import it.unibo.pcd.assignment2.eventdriven.model.Solution
 import javafx.fxml.{FXML, FXMLLoader}
@@ -7,7 +7,7 @@ import javafx.scene.layout.GridPane
 
 import java.time.format.DateTimeFormatter
 
-trait SolutionCard {
+sealed trait SolutionCard {
   def pane: GridPane
 }
 
@@ -39,7 +39,7 @@ object SolutionCard {
                          s"il ${solution.arrivalStation.datetime.format(dateTimeFormatter)}")
     trainsField.getPanes.setAll(solution.trains.map(TrainCard(_)).map(_.titledPane): _*)
 
-    override def pane: GridPane = root
+    override val pane: GridPane = root
   }
 
   def apply(solution: Solution): SolutionCard = new SolutionCardImpl(solution)

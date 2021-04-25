@@ -1,11 +1,11 @@
-package it.unibo.pcd.assignment2.eventdriven.view
+package it.unibo.pcd.assignment2.eventdriven.view.cards
 
 import it.unibo.pcd.assignment2.eventdriven.model.Train
 import javafx.fxml.{FXML, FXMLLoader}
 import javafx.scene.control.TitledPane
 import org.apache.commons.text.WordUtils
 
-trait TrainCard {
+sealed trait TrainCard {
   def titledPane: TitledPane
 }
 
@@ -20,7 +20,7 @@ object TrainCard {
     loader.load()
     root.setText(s"${WordUtils.capitalizeFully(train.trainType.toString.replace("_", " "))} ${train.trainCode.getOrElse("")}")
 
-    override def titledPane: TitledPane = root
+    override val titledPane: TitledPane = root
   }
 
   def apply(train: Train): TrainCard = new TrainCardImpl(train)
