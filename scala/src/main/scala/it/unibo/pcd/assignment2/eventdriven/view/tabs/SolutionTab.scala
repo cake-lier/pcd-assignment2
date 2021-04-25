@@ -5,19 +5,19 @@ import it.unibo.pcd.assignment2.eventdriven.model.Solution
 import it.unibo.pcd.assignment2.eventdriven.view.LoadingLabel
 import it.unibo.pcd.assignment2.eventdriven.view.cards.SolutionCard
 import javafx.fxml.{FXML, FXMLLoader}
-import javafx.scene.control._
+import javafx.scene.control.{Button, ChoiceBox, DatePicker, ScrollPane, TextField}
 import scalafx.application.Platform
 import scalafx.scene.layout.VBox
 
 import java.time.{LocalDateTime, LocalTime}
 
-sealed trait SolutionTab {
+sealed trait SolutionTab extends Tab {
  def displaySolutions(solutions: List[Solution]): Unit
-
- def tab: Tab
 }
 
 object SolutionTab {
+  import javafx.scene.control.Tab
+
   private class SolutionTabImpl(controller: Controller) extends SolutionTab {
     @FXML
     private var root: Tab = _

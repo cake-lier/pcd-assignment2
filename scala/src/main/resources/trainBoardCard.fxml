@@ -16,10 +16,10 @@
         <RowConstraints percentHeight="25.0" vgrow="SOMETIMES" />
         <RowConstraints percentHeight="25.0" vgrow="SOMETIMES" />
     </rowConstraints>
-    <Label fx:id="trainBoardTitle" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell" text="Label" />
-    <Label fx:id="trainBoardDelay" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell" text="Label" GridPane.rowIndex="1" />
-    <Label fx:id="trainBoardPlannedPlatform" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell" text="Label" GridPane.rowIndex="2" />
-    <Label fx:id="trainBoardExpectedPlatform" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell" text="Label" GridPane.rowIndex="3" />
+    <Label fx:id="trainBoardTitle" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell" />
+    <Label fx:id="trainBoardDelay" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell" GridPane.rowIndex="1" />
+    <Label fx:id="trainBoardPlannedPlatform" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell" GridPane.rowIndex="2" />
+    <Label fx:id="trainBoardExpectedPlatform" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell" GridPane.rowIndex="3" />
    <padding>
       <Insets left="5.0" right="5.0" top="5.0" />
    </padding>

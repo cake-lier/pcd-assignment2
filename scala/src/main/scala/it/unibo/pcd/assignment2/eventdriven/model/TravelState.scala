@@ -33,29 +33,15 @@ object TravelState {
     val delay: Option[Int] = None
   }
 
-  object Delayed {
-    private case class Delayed(delayMin: Int) extends TravelState {
-      val state: State = TravelStateEnum.DELAYED
+  case class Delayed(delayMin: Int) extends TravelState {
+    val state: State = TravelStateEnum.DELAYED
 
-      val delay: Option[Int] = Some(delayMin)
-    }
-
-    def apply(delay: Int): TravelState = delay match {
-      case d if d > 0 => Delayed(d)
-      case _ => throw new IllegalArgumentException
-    }
+    val delay: Option[Int] = Some(delayMin)
   }
 
-  object Early {
-    private case class Early(earlyMin: Int) extends TravelState {
-      val state: State = TravelStateEnum.EARLY
+  case class Early(earlyMin: Int) extends TravelState {
+    val state: State = TravelStateEnum.EARLY
 
-      val delay: Option[Int] = Some(-earlyMin)
-    }
-
-    def apply(early: Int): TravelState = early match {
-      case e if e > 0 => Early(e)
-      case _ => throw new IllegalArgumentException
-    }
+    val delay: Option[Int] = Some(-earlyMin)
   }
 }

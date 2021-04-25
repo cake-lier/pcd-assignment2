@@ -3,19 +3,19 @@ package it.unibo.pcd.assignment2.eventdriven.view.tabs
 import it.unibo.pcd.assignment2.eventdriven.controller.Controller
 import it.unibo.pcd.assignment2.eventdriven.model.StationInfo
 import it.unibo.pcd.assignment2.eventdriven.view.LoadingLabel
-import it.unibo.pcd.assignment2.eventdriven.view.cards.{TrainBoardCard, TrainBoardCardType}
+import it.unibo.pcd.assignment2.eventdriven.view.cards.TrainBoardCard
 import javafx.fxml.{FXML, FXMLLoader}
-import javafx.scene.control.{Button, ScrollPane, Tab, TextField}
+import javafx.scene.control.{Button, ScrollPane, TextField}
 import scalafx.application.Platform
 import scalafx.scene.layout.VBox
 
-sealed trait StationTab {
+sealed trait StationTab extends Tab {
  def displayStationInfo(stationInfo: StationInfo): Unit
-
- def tab: Tab
 }
 
 object StationTab {
+  import javafx.scene.control.Tab
+
   private class StationTabImpl(controller: Controller) extends StationTab {
     private var updatedStation: Option[String] = None
     @FXML
@@ -42,7 +42,10 @@ object StationTab {
       controller.startStationInfoUpdates(station)
       updatedStation = Some(station)
     })
-    stopMonitorStation.setOnMouseClicked(_ => updatedStation.foreach(controller.stopStationInfoUpdates))
+    stopMonitorStation.setOnMouseClicked(_ => {
+      updatedStation.foreach(controller.stopStationInfoUpdates)
+      updatedStation = None
+    })
 
     override val tab: Tab = root
 
@@ -50,11 +53,14 @@ object StationTab {
       val arrivalsContainer = new VBox(5)
       arrivals.setContent(arrivalsContainer)
       arrivalsContainer.children
-                       .setAll(stationInfo.arrivals.map(r => TrainBoardCard(r, TrainBoardCardType.ARRIVAL)).map(_.pane).toSeq: _*)
+                       .setAll(stationInfo.arrivals
+                                          .map(r => TrainBoardCard(r, TrainBoardCard.Type.ARRIVAL))
+                                          .map(_.pane)
+                                          .toSeq: _*)
       val departuresContainer = new VBox(5)
       departures.setContent(departuresContainer)
       departuresContainer.children
-                         .setAll(stationInfo.departures.map(r => TrainBoardCard(r, TrainBoardCardType.DEPARTURE))
+                         .setAll(stationInfo.departures.map(r => TrainBoardCard(r, TrainBoardCard.Type.DEPARTURE))
                                                        .map(_.pane)
                                                        .toSeq: _*)
     })

@@ -6,22 +6,17 @@ import org.apache.commons.text.WordUtils
 
 import java.time.format.DateTimeFormatter
 
-object TrainBoardCardType extends Enumeration {
-    type Type = Value
-    val DEPARTURE, ARRIVAL = Value
-}
-
-sealed trait TrainBoardCard {
-  def pane: Pane
-}
-
 object TrainBoardCard {
   import javafx.fxml.{FXML, FXMLLoader}
   import javafx.scene.control.Label
   import javafx.scene.layout.GridPane
 
-  private class TrainBoardCardImpl(trainBoardRecord: TrainBoardRecord,
-                                   cardType: TrainBoardCardType.Value) extends TrainBoardCard {
+  object Type extends Enumeration {
+    type Type = Value
+    val DEPARTURE, ARRIVAL = Value
+  }
+
+  private class TrainBoardCardImpl(trainBoardRecord: TrainBoardRecord, cardType: Type.Value) extends Card[Pane] {
     @FXML
     private var root: GridPane = _
     @FXML
@@ -41,7 +36,7 @@ object TrainBoardCard {
     trainBoardTitle.setText(s"${WordUtils.capitalizeFully(trainBoardRecord.train.trainType.toString.replace("_", " "))} " +
                             s"${trainBoardRecord.train.trainCode.getOrElse("")} " +
                             s"delle ore ${trainBoardRecord.time.format(timeFormatter)} " +
-                            (if (cardType == TrainBoardCardType.DEPARTURE) "in partenza per" else "in arrivo da") +
+                            (if (cardType == Type.DEPARTURE) "in partenza per" else "in arrivo da") +
                             s" ${trainBoardRecord.station.stationName}")
     trainBoardDelay.setText(
       if (trainBoardRecord.state.state == TravelStateEnum.DELAYED) {
@@ -58,6 +53,6 @@ object TrainBoardCard {
     override val pane: Pane = root
   }
 
-  def apply(trainBoardRecord: TrainBoardRecord, cardType: TrainBoardCardType.Value): TrainBoardCard =
-      new TrainBoardCardImpl(trainBoardRecord, cardType)
+  def apply(trainBoardRecord: TrainBoardRecord, cardType: Type.Value): Card[Pane] =
+    new TrainBoardCardImpl(trainBoardRecord, cardType)
 }

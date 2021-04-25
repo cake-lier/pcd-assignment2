@@ -7,12 +7,8 @@ import javafx.scene.layout.GridPane
 
 import java.time.format.DateTimeFormatter
 
-sealed trait SolutionCard {
-  def pane: GridPane
-}
-
 object SolutionCard {
-  private class SolutionCardImpl(solution: Solution) extends SolutionCard {
+  private class SolutionCardImpl(solution: Solution) extends Card[GridPane] {
     @FXML
     private var root: GridPane = _
     @FXML
@@ -37,10 +33,10 @@ object SolutionCard {
                            s"il ${solution.departureStation.datetime.format(dateTimeFormatter)}")
     arrivalField.setText(s"${arrivalField.getText}${solution.arrivalStation.stationName} " +
                          s"il ${solution.arrivalStation.datetime.format(dateTimeFormatter)}")
-    trainsField.getPanes.setAll(solution.trains.map(TrainCard(_)).map(_.titledPane): _*)
+    trainsField.getPanes.setAll(solution.trains.map(TrainCard(_)).map(_.pane): _*)
 
     override val pane: GridPane = root
   }
 
-  def apply(solution: Solution): SolutionCard = new SolutionCardImpl(solution)
+  def apply(solution: Solution): Card[GridPane] = new SolutionCardImpl(solution)
 }

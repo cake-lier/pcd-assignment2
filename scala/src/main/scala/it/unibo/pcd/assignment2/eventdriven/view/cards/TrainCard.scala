@@ -5,12 +5,8 @@ import javafx.fxml.{FXML, FXMLLoader}
 import javafx.scene.control.TitledPane
 import org.apache.commons.text.WordUtils
 
-sealed trait TrainCard {
-  def titledPane: TitledPane
-}
-
 object TrainCard {
-  private class TrainCardImpl(train: Train) extends TrainCard {
+  private class TrainCardImpl(train: Train) extends Card[TitledPane] {
     @FXML
     private var root: TitledPane = _
 
@@ -20,8 +16,8 @@ object TrainCard {
     loader.load()
     root.setText(s"${WordUtils.capitalizeFully(train.trainType.toString.replace("_", " "))} ${train.trainCode.getOrElse("")}")
 
-    override val titledPane: TitledPane = root
+    override val pane: TitledPane = root
   }
 
-  def apply(train: Train): TrainCard = new TrainCardImpl(train)
+  def apply(train: Train): Card[TitledPane] = new TrainCardImpl(train)
 }

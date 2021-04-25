@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.control.ScrollPane?>
 
 <Tab fx:id="root" closable="false" text="Stato treno" xmlns="https://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
     <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
@@ -42,8 +43,8 @@
                 </GridPane>
             </top>
             <center>
-                <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                           BorderPane.alignment="CENTER" />
+                <ScrollPane stylesheets="style.css" fx:id="stations" maxHeight="1.7976931348623157E308"
+                            maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER" fitToHeight="true" fitToWidth="true"/>
             </center>
         </BorderPane>
     </AnchorPane>
