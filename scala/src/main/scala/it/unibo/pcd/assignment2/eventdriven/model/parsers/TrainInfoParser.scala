@@ -1,15 +1,18 @@
-package it.unibo.pcd.assignment2.eventdriven
+package it.unibo.pcd.assignment2.eventdriven.model.parsers
 
-import it.unibo.pcd.assignment2.eventdriven.model.{RouteArrivalStation, RouteDepartureStation, Train, TrainInfo, TrainType, TravelState}
+import it.unibo.pcd.assignment2.eventdriven.TimeUtils
+import it.unibo.pcd.assignment2.eventdriven.model._
 import play.api.libs.json.{JsValue, Json}
 
-import java.time.temporal.ChronoUnit
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
-object Mannaggia_Trenitalia extends App {
+sealed trait TrainInfoParser extends Parser[TrainInfo]
+
+object TrainInfoParser extends TrainInfoParser {
 
   import ImplicitConversion._
-  def cheSchifoLAPI(trainStateJson: String): TrainInfo = {
+  override def parse(trainStateJson: String): TrainInfo = {
     val json = Json.parse(trainStateJson);
     val stops = (json \ "fermate").as[List[JsValue]]
     // stations
@@ -26,13 +29,13 @@ object Mannaggia_Trenitalia extends App {
     // arrival dateTime
     val isArrived = (arrivalStationJson \ "binarioEffettivoArrivoDescrizione").asOpt[String].nonEmpty
 
-    val train:Train = Train((json \ "numeroTreno").asOpt[Int].map(_.toString),
-      TrainTypeMap.map((json \ "compNumeroTreno").as[String].split(" ")(1)))
-    val departureStation = RouteDepartureStation((departureStationJson \ "stazione").as[String],plannedDepartureDatetime,realDepartureDatetime,plannedDeparturePlatform,actualDeparturePlatform)
-    TrainInfo(train,_computeTravelState(json,isArrived,delayMinutes),departureStation,_trainStops(stops.tail,delayMinutes))
+    val train: Train = Train((json \ "numeroTreno").asOpt[Int].map(_.toString),
+      TrainTypeMap.map((json \ "compNumeroTreno").as[String].split(" ")(0)))
+    val departureStation = RouteDepartureStation((departureStationJson \ "stazione").as[String], plannedDepartureDatetime, realDepartureDatetime, plannedDeparturePlatform, actualDeparturePlatform)
+    TrainInfo(train, _computeTravelState(json, isArrived, delayMinutes), departureStation, _trainStops(stops.tail, delayMinutes))
   }
 
-  def _computeTravelState(json:JsValue,isArrived:Boolean,delay:Int): TravelState = {
+  def _computeTravelState(json: JsValue, isArrived: Boolean, delay: Int): TravelState = {
     val isDeparted = !(json \ "nonPartito").as[Boolean]
     if (!isDeparted) {
       return TravelState.NotDeparted
@@ -49,10 +52,10 @@ object Mannaggia_Trenitalia extends App {
     TravelState.InTime
   }
 
-  def _trainStops(stops:List[JsValue],delayMinutes:Int):List[RouteArrivalStation] = stops map (_fromStopToArrivalStation(_,delayMinutes))
+  def _trainStops(stops: List[JsValue], delayMinutes: Int): List[RouteArrivalStation] = stops map (_fromStopToArrivalStation(_, delayMinutes))
 
-  def _fromStopToArrivalStation(stop:JsValue,delayMinutes:Int):RouteArrivalStation = {
-    val stationName = (stop \"stazione").as[String]
+  def _fromStopToArrivalStation(stop: JsValue, delayMinutes: Int): RouteArrivalStation = {
+    val stationName = (stop \ "stazione").as[String]
     // datetime
     val plannedArrivalDatetime = (stop \ "arrivo_teorico").as[Long].toLocalDateTime
     val actualArrivalDatetime = plannedArrivalDatetime.plus(delayMinutes, ChronoUnit.MINUTES)
@@ -60,21 +63,23 @@ object Mannaggia_Trenitalia extends App {
     val plannedArrivalPlatform = (stop \ "binarioProgrammatoArrivoDescrizione").as[String]
     val actualArrivalPlatform = (stop \ "binarioEffettivoArrivoDescrizione").asOpt[String]
     val realArrivalDatetime = (stop \ "arrivo_reale").asOpt[Long].map(_.toLocalDateTime)
-    RouteArrivalStation(stationName,plannedArrivalDatetime,Some(actualArrivalDatetime),realArrivalDatetime,plannedArrivalPlatform,actualArrivalPlatform)
+    RouteArrivalStation(stationName, plannedArrivalDatetime, Some(actualArrivalDatetime), realArrivalDatetime, plannedArrivalPlatform, actualArrivalPlatform)
   }
 
-  object TrainTypeMap{
-    var map = Map("REG" -> TrainType.REGIONALE,
-                      "FB"->TrainType.FRECCIABIANCA,
-                      "FR"->TrainType.FRECCIAROSSA,
-                      "FA"->TrainType.FRECCIARGENTO,
-                      "IC"->TrainType.INTERCITY)
-    //TODO INTERCITY e INTERCITY NOTTE e REG V????
+  object TrainTypeMap {
+    var map = Map(
+      "REG" -> TrainType.REGIONALE,
+      "FB" -> TrainType.FRECCIABIANCA,
+      "FR" -> TrainType.FRECCIAROSSA,
+      "FA" -> TrainType.FRECCIARGENTO,
+      "IC" -> TrainType.INTERCITY,
+      "RV" -> TrainType.REGIONALE_VELOCE,
+      "ICN" -> TrainType.INTERCITY_NOTTE)
   }
 
-  object ImplicitConversion{
-    implicit class TimeConverter(time:Long){
-      def toLocalDateTime:LocalDateTime = TimeUtils.fromMillisToLocalDateTime(time)
+  object ImplicitConversion {
+    implicit class TimeConverter(time: Long) {
+      def toLocalDateTime: LocalDateTime = TimeUtils.fromMillisToLocalDateTime(time)
     }
   }
 }

@@ -1,5 +1,5 @@
 package it.unibo.pcd.assignment2.eventdriven.model.parsers
 
-trait JsonParser[A] {
+trait Parser[A] {
   def parse(json: String): A
 }
