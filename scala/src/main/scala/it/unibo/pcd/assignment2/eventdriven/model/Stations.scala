@@ -69,3 +69,18 @@ object RouteArrivalStation {
             actualPlatform: Option[String]): RouteArrivalStation =
     RouteArrivalStationImpl(stationName, plannedDatetime, estimatedDatetime, actualDatetime, plannedPlatform, actualPlatform)
 }
+
+sealed trait Stop extends Station {
+  def departureDatetime: Option[LocalDateTime]
+
+  def arrivalDatetime: Option[LocalDateTime]
+}
+
+object Stop {
+  private case class StopImpl(stationName: String,
+                              departureDatetime: Option[LocalDateTime],
+                              arrivalDatetime: Option[LocalDateTime]) extends Stop
+
+  def apply(stationName: String, departureDatetime: Option[LocalDateTime], arrivalDatetime: Option[LocalDateTime]): Stop =
+    StopImpl(stationName, departureDatetime, arrivalDatetime)
+}
