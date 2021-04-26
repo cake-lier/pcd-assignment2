@@ -3,7 +3,7 @@ package it.unibo.pcd.assignment2.eventdriven.model.parsers
 import it.unibo.pcd.assignment2.eventdriven.TimeUtils.fromMillisToLocalDateTime
 import it.unibo.pcd.assignment2.eventdriven.model.{Solution, SolutionStation, Train, TrainType}
 
-sealed trait SolutionsParser extends JsonParser[List[Solution]]
+sealed trait SolutionsParser extends Parser[List[Solution]]
 
 object SolutionsParser extends SolutionsParser {
   import play.api.libs.json.{JsLookupResult, JsValue, Json}
@@ -11,7 +11,6 @@ object SolutionsParser extends SolutionsParser {
   override def parse(json: String): List[Solution] = {
     val trainListKey = "trainlist"
     val priceKey = "minprice"
-    val bookableKey = "bookable"
     val saleableKey = "saleable"
     val originKey = "origin"
     val destinationKey = "destination"

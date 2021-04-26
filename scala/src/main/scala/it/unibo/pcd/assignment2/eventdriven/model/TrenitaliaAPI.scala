@@ -2,7 +2,7 @@ package it.unibo.pcd.assignment2.eventdriven.model
 
 import io.vertx.core.Future
 import it.unibo.pcd.assignment2.eventdriven.controller.WebClient
-import it.unibo.pcd.assignment2.eventdriven.model.parsers.SolutionsParser
+import it.unibo.pcd.assignment2.eventdriven.model.parsers.{SolutionsParser, TrainInfoParser, WebStationCodeFromStationNameParser, WebStationCodeFromTripParser, WebStationInfoParser}
 import it.unibo.pcd.assignment2.eventdriven.model.{RouteArrivalStation => ConcreteRouteArrivalStation, RouteDepartureStation => ConcreteRouteDepartureStation, RouteStation => ConcreteRouteStation, Solution => ConcreteSolution, SolutionStation => ConcreteSolutionStation, Station => ConcreteStation, StationInfo => ConcreteStationInfo, Train => ConcreteTrain, TrainBoardRecord => ConcreteTrainBoardRecord, TrainInfo => ConcreteTrainInfo, TrainType => ConcreteTrainType, TravelState => ConcreteTravelState}
 
 import java.net.URLEncoder
@@ -43,9 +43,22 @@ object TrenitaliaAPI {
       webClient.get(host, requestURI).compose(b => Future.succeededFuture(SolutionsParser.parse(b)))
     }
 
-    override def getTrainInfo(trainCode: TrainCode): Future[TrainInfo] = ???
+    override def getTrainInfo(trainCode: TrainCode): Future[TrainInfo] = {
+      val viaggiatrenoHost = "www.viaggiatreno.it"
 
-    override def getStationInfo(stationName: StationName): Future[StationInfo] = ???
+
+      webClient.get(viaggiatrenoHost,s"/viaggiatrenonew/resteasy/viaggiatreno/cercaNumeroTreno/$trainCode")
+        .compose(c=>webClient.get(viaggiatrenoHost,s"/viaggiatrenomobile/resteasy/viaggiatreno/andamentoTreno/${WebStationCodeFromTripParser.parse(c)}/$trainCode/${System.currentTimeMillis()}"))
+        .compose(r=>Future.succeededFuture(TrainInfoParser.parse(r)))
+    }
+
+    override def getStationInfo(stationName: StationName): Future[StationInfo] = {
+      val viaggiatrenoHost = "www.viaggiatreno.it"
+
+      webClient.get(viaggiatrenoHost,s"/viaggiatrenonew/resteasy/viaggiatreno/cercaStazione/$stationName")
+        .compose(c=>webClient.post(viaggiatrenoHost,s"http://www.viaggiatreno.it/vt_pax_internet/mobile/stazione?codiceStazione=${WebStationCodeFromStationNameParser.parse(c)}",Map()))
+        .compose(r=>{println(WebStationInfoParser.parse(r));Future.succeededFuture(WebStationInfoParser.parse(r))})
+    }
   }
 
   def apply(webClient: WebClient): TrenitaliaAPI = new TrenitaliaAPIImpl(webClient)
