@@ -1,17 +1,48 @@
 package it.unibo.pcd.assignment2.eventdriven
 
+import it.unibo.pcd.assignment2.eventdriven.Mannaggia_Trenitalia.TrainTypeMap
+
+import java.time.{LocalDate, LocalTime}
+import it.unibo.pcd.assignment2.eventdriven.model.{Station, StationInfo, Train, TrainBoardRecord, TravelState}
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
+import net.ruippeixotog.scalascraper.browser.JsoupBrowser.JsoupElement
 import net.ruippeixotog.scalascraper.dsl.DSL._
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
 import net.ruippeixotog.scalascraper.dsl.DSL.Parse._
+import net.ruippeixotog.scalascraper.model.Element
+
+import scala.util.matching.Regex
 
 object WebTrainParser extends App {
 
-  val browser = JsoupBrowser()
-  val doc2 = browser.get("http://www.viaggiatreno.it/vt_pax_internet/mobile/scheda?numeroTreno=3902")
-  val trainId = doc2 >> text("h1")
-  val elements = doc2 >> elementList(".corpocentrale")
-  //println(elements map(e=> (e>>text("h2")) ->(e>>text("p"))) toMap)
-  println(elements >> allText("h2"))
-  //println(doc2 >> elementList("div") map (_>>allText))
+  def extractStationInfo(dom:String):StationInfo = {
+
+    var arrivals: Set[TrainBoardRecord] = Set()
+    var departures:Set[TrainBoardRecord] = Set()
+
+    def _createTrain(trainCode:String,trainType:String,station:String,trainState:TravelState,time:String,expPlatform:String,realPlatform:String):TrainBoardRecord =
+      TrainBoardRecord(Train(Some(trainCode),TrainTypeMap.map(trainType)),Station(station),trainState,LocalTime.parse(time),Some(expPlatform),_getPlatform(realPlatform))
+
+    def _getPlatform(realPlatform:String):Option[String] = if(realPlatform == "--") None else Some(realPlatform)
+
+    (JsoupBrowser().parseString(dom) >> elementList(".bloccorisultato"))
+      .map(e => (e >> allText(".bloccorisultato"))
+        .replace(" » Vedi scheda", "")
+        .replace("minuti","")
+        .split("\\s+")
+        .filter(_.nonEmpty)
+        .toList.mkString(" "))
+      .foreach {
+        case s"${t} ${n} ${d} ${s} Delle ore ${o} Binario Previsto: ${bp} Binario Reale: ${br} ritardo ${r}" => d match {
+          case "Da" => arrivals += _createTrain(n, t, s, TravelState.Delayed(r.toInt), o, bp, br)
+          case "Per" => departures += _createTrain(n, t, s, TravelState.Delayed(r.toInt), o, bp, br)
+        }
+        case s"${t} ${n} ${d} ${s} Delle ore ${o} Binario Previsto: ${bp} Binario Reale: ${br} in orario" => d match {
+          case "Da" => arrivals += _createTrain(n, t, s, TravelState.InTime, o, bp, br)
+          case "Per" => arrivals += _createTrain(n, t, s, TravelState.InTime, o, bp, br)
+        }
+      }
+
+    StationInfo(departures,arrivals)
+  }
 }
