@@ -22,12 +22,28 @@ trait TrainsAPI {
     def datetime: LocalDateTime
   }
 
+  type Stop <: Station {
+    def departureDatetime: Option[LocalDateTime]
+
+    def arrivalDatetime: Option[LocalDateTime]
+  }
+
+  type SolutionTrain <: Train {
+    def departureStation: SolutionStation
+
+    def arrivalStation: SolutionStation
+
+    def stops: List[Stop]
+  }
+
   type Solution <: {
-    def trains: List[Train]
+    def trains: List[SolutionTrain]
 
     def price: Option[Double]
 
     def bookable: Boolean
+
+    def saleable: Boolean
 
     def departureStation: SolutionStation
 

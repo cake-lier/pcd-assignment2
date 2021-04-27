@@ -3,11 +3,13 @@ package it.unibo.pcd.assignment2.eventdriven.model
 import java.time.Duration
 
 sealed trait Solution {
-  def trains: List[Train]
+  def trains: List[SolutionTrain]
 
   def price: Option[Double]
 
   def bookable: Boolean
+
+  def saleable: Boolean
 
   def departureStation: SolutionStation
 
@@ -17,20 +19,18 @@ sealed trait Solution {
 }
 
 object Solution {
-  private case class SolutionImpl(trains: List[Train],
+  private case class SolutionImpl(trains: List[SolutionTrain],
                                   price: Option[Double],
                                   bookable: Boolean,
+                                  saleable: Boolean,
                                   departureStation: SolutionStation,
                                   arrivalStation: SolutionStation) extends Solution
 
-  def apply(trains: List[Train],
+  def apply(trains: List[SolutionTrain],
             price: Option[Double],
             bookable: Boolean,
+            saleable: Boolean,
             departureStation: SolutionStation,
             arrivalStation: SolutionStation): Solution =
-    SolutionImpl(trains: List[Train],
-                 price: Option[Double],
-                 bookable: Boolean,
-                 departureStation: SolutionStation,
-                 arrivalStation: SolutionStation)
+    SolutionImpl(trains, price, bookable, saleable, departureStation, arrivalStation)
 }

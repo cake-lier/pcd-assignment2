@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<GridPane fx:id="root" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" stylesheets="@style.css" vgap="2.5" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
+    <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES" percentWidth="100.0" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints percentHeight="34.0" vgrow="SOMETIMES" />
+        <RowConstraints percentHeight="33.0" vgrow="SOMETIMES" />
+        <RowConstraints percentHeight="33.0" vgrow="SOMETIMES" />
+    </rowConstraints>
+    <Label fx:id="stopTitle" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell" />
+    <Label fx:id="stopArrival" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell" text="Arrivo: " GridPane.rowIndex="1" />
+    <Label fx:id="stopDeparture" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell" text="Partenza: " GridPane.rowIndex="2" />
+   <padding>
+      <Insets bottom="7.5" />
+   </padding>
+</GridPane>

@@ -26,7 +26,10 @@ object SolutionCard {
     loader.setController(this)
     loader.setLocation(ClassLoader.getSystemResource("solutionCard.fxml"))
     loader.load()
-    priceField.setText(solution.price.map(d => f"Costo: $d%.2f €").getOrElse("La soluzione non è acquistabile"))
+    priceField.setText(solution.price
+                               .filter(_ => solution.saleable)
+                               .map(d => f"Costo: $d%.2f €")
+                               .getOrElse("La soluzione non è acquistabile"))
     bookableField.setText(s"La soluzione ${ if (solution.bookable) "" else "non " }è prenotabile")
     val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/YY 'alle' HH:mm")
     departureField.setText(s"${departureField.getText}${solution.departureStation.stationName} " +

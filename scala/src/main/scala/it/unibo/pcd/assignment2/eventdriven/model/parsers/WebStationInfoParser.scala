@@ -1,7 +1,7 @@
 package it.unibo.pcd.assignment2.eventdriven.model.parsers
 
 
-import it.unibo.pcd.assignment2.eventdriven.model.parsers.TrainInfoParser.{TrainTypeMap, schifo}
+import it.unibo.pcd.assignment2.eventdriven.model.parsers.TrainInfoParser.TrainTypeMap
 import it.unibo.pcd.assignment2.eventdriven.model.{Station, StationInfo, Train, TrainBoardRecord, TravelState}
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.scraper.ContentExtractors.elementList

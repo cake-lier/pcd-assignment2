@@ -1,7 +1,7 @@
 package it.unibo.pcd.assignment2.eventdriven.controller
 
 import io.vertx.core.{Future, MultiMap}
-import io.vertx.ext.web.client.HttpResponse
+import io.vertx.ext.web.client.{HttpResponse, WebClientSession}
 
 sealed trait WebClient {
   def get(host: String, requestURI: String): Future[String]
@@ -17,13 +17,16 @@ object WebClient {
   import scala.jdk.CollectionConverters._
 
   private case class WebClientImpl(vertx: Vertx) extends WebClient {
-    val webClient: VertxWebClient = VertxWebClient.create(vertx)
+    val webClient: WebClientSession = WebClientSession.create(VertxWebClient.create(vertx))
+    val httpsPort = 443
 
     override def get(host: String, requestURI: String): Future[String] =
-      fromResponseToBody(webClient.get(host, requestURI).send())
+      fromResponseToBody(webClient.get(httpsPort, host, requestURI).ssl(true).send())
 
     override def post(host: String, requestURI: String, body: Map[String, String]): Future[String] =
-      fromResponseToBody(webClient.post(host, requestURI).sendForm(MultiMap.caseInsensitiveMultiMap().addAll(body.asJava)))
+      fromResponseToBody(webClient.post(httpsPort, host, requestURI))
+                                  .ssl(true)
+                                  .sendForm(MultiMap.caseInsensitiveMultiMap().addAll(body.asJava)))
 
     private def fromResponseToBody(req: Future[HttpResponse[Buffer]]): Future[String] =
       req.compose(res => Future.succeededFuture(res.bodyAsString))
