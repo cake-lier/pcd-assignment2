@@ -4,12 +4,10 @@ import com.google.common.net.UrlEscapers
 import io.vertx.core.Future
 import it.unibo.pcd.assignment2.eventdriven.FutureUtils
 import it.unibo.pcd.assignment2.eventdriven.controller.WebClient
-import it.unibo.pcd.assignment2.eventdriven.model.parsers.{SolutionsParser, TrainInfoParser, WebStationCodeFromStationNameParser, WebStationCodeFromTripParser, WebStationInfoParser}
+import it.unibo.pcd.assignment2.eventdriven.model.parsers._
 import it.unibo.pcd.assignment2.eventdriven.model.{RouteArrivalStation => ConcreteRouteArrivalStation, RouteDepartureStation => ConcreteRouteDepartureStation, RouteStation => ConcreteRouteStation, Solution => ConcreteSolution, SolutionStation => ConcreteSolutionStation, SolutionTrain => ConcreteSolutionTrain, Station => ConcreteStation, StationInfo => ConcreteStationInfo, Stop => ConcreteStop, Train => ConcreteTrain, TrainBoardRecord => ConcreteTrainBoardRecord, TrainInfo => ConcreteTrainInfo, TrainType => ConcreteTrainType, TravelState => ConcreteTravelState}
 import play.api.libs.json.JsValue
 
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -37,6 +35,10 @@ object TrenitaliaAPI {
   import play.api.libs.json.Json
 
   private class TrenitaliaAPIImpl(webClient: WebClient) extends TrenitaliaAPI {
+    val viaggiatrenoHost = "www.viaggiatreno.it"
+
+    private def encode(url: String): String = UrlEscapers.urlFragmentEscaper.escape(url)
+
     override def getTrainSolutions(departureStation: StationName,
                                    arrivalStation: StationName,
                                    datetimeDeparture: LocalDateTime): Future[List[Solution]] = {
@@ -44,8 +46,8 @@ object TrenitaliaAPI {
       val solutionsURI = "/msite/api/solutions"
       val getSolutionsURI = solutionsURI +
                             "?" +
-                            s"origin=${_encode(departureStation)}" +
-                            s"&destination=${_encode(arrivalStation)}" +
+                            s"origin=${encode(departureStation)}" +
+                            s"&destination=${encode(arrivalStation)}" +
                             s"&adate=${datetimeDeparture.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}" +
                             s"&atime=${datetimeDeparture.getHour}" +
                             "&arflag=A&adultno=1&childno=0&direction=A&frecce=false&onlyRegional=false"
@@ -54,26 +56,24 @@ object TrenitaliaAPI {
                                                  .as[List[JsValue]]
                                                  .map(o => (o \ "idsolution").as[String])
                                                  .map(i => webClient.get(host, s"$solutionsURI/$i/details")))
-                                        .compose(s => Future.succeededFuture(SolutionsParser.parse(b, s))))
+                                        .compose(s => Future.succeededFuture(SolutionsParser(b, s))))
     }
 
     override def getTrainInfo(trainCode: TrainCode): Future[TrainInfo] = {
-      val viaggiatrenoHost = "www.viaggiatreno.it"
-
       webClient.get(viaggiatrenoHost,s"/viaggiatrenonew/resteasy/viaggiatreno/cercaNumeroTreno/$trainCode")
         .compose(c=>webClient.get(viaggiatrenoHost,s"/viaggiatrenomobile/resteasy/viaggiatreno/andamentoTreno/${WebStationCodeFromTripParser.parse(c)}/$trainCode/${System.currentTimeMillis()}"))
         .compose(r=>Future.succeededFuture(TrainInfoParser.parse(r)))
     }
 
-    override def getStationInfo(stationName: StationName): Future[StationInfo] = {
-      val viaggiatrenoHost = "www.viaggiatreno.it"
-      webClient.get(viaggiatrenoHost,s"/viaggiatrenonew/resteasy/viaggiatreno/cercaStazione/${_encode(stationName)}")
-        .compose(c=>{println(WebStationCodeFromStationNameParser.parse(c));webClient.post(viaggiatrenoHost,s"/vt_pax_internet/mobile/stazione?codiceStazione=${WebStationCodeFromStationNameParser.parse(c)}",Map())})
-        .compose(r=>{println(r);Future.succeededFuture(WebStationInfoParser.parse(r))})
-    }
+    override def getStationInfo(stationName: StationName): Future[StationInfo] =
+      webClient.get(viaggiatrenoHost,s"/viaggiatrenonew/resteasy/viaggiatreno/cercaStazione/${encode(stationName)}")
+               .compose(s => webClient.post(
+                 viaggiatrenoHost,
+                 s"/vt_pax_internet/mobile/stazione",
+                 Map("codiceStazione" -> StationNameParser(s))
+               ))
+               .compose(d => Future.succeededFuture(StationInfoParser(d)))
   }
 
   def apply(webClient: WebClient): TrenitaliaAPI = new TrenitaliaAPIImpl(webClient)
-
-  def _encode(url:String):String = UrlEscapers.urlFragmentEscaper.escape(url)
 }

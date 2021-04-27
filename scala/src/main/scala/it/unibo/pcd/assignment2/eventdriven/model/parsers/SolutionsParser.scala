@@ -10,7 +10,7 @@ import java.time.{Instant, LocalDateTime, ZoneId}
 object SolutionsParser {
   import play.api.libs.json.{JsLookupResult, JsValue, Json}
 
-  def parse(json: String, details: List[String]): List[Solution] = {
+  def apply(json: String, details: List[String]): List[Solution] = {
     val trainListKey = "trainlist"
     val priceKey = "minprice"
     val saleableKey = "saleable"

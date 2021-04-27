@@ -35,15 +35,19 @@ object StationTab {
     loader.setLocation(ClassLoader.getSystemResource("stationTab.fxml"))
     loader.load
     startMonitorStation.setOnMouseClicked(_ => {
+      startMonitorStation.setDisable(true)
       arrivals.setContent(LoadingLabel().label)
       departures.setContent(LoadingLabel().label)
       val station = stationName.getText
       controller.startStationInfoUpdates(station)
       updatedStation = Some(station)
+      stopMonitorStation.setDisable(false)
     })
     stopMonitorStation.setOnMouseClicked(_ => {
+      stopMonitorStation.setDisable(true)
       updatedStation.foreach(controller.stopStationInfoUpdates)
       updatedStation = None
+      startMonitorStation.setDisable(false)
     })
 
     override val tab: Tab = root
@@ -51,17 +55,14 @@ object StationTab {
     override def displayStationInfo(stationInfo: StationInfo): Unit = {
       val arrivalsContainer = new VBox(5)
       arrivals.setContent(arrivalsContainer)
-      arrivalsContainer.children
-                       .setAll(stationInfo.arrivals
-                                          .map(r => TrainBoardCard(r, TrainBoardCard.Type.ARRIVAL))
-                                          .map(_.pane)
-                                          .toSeq: _*)
+      arrivalsContainer.children.setAll(stationInfo.arrivals
+                                                   .map(r => TrainBoardCard(r, TrainBoardCard.Type.ARRIVAL))
+                                                   .map(_.pane): _*)
       val departuresContainer = new VBox(5)
       departures.setContent(departuresContainer)
-      departuresContainer.children
-                         .setAll(stationInfo.departures.map(r => TrainBoardCard(r, TrainBoardCard.Type.DEPARTURE))
-                                                       .map(_.pane)
-                                                       .toSeq: _*)
+      departuresContainer.children.setAll(stationInfo.departures
+                                                     .map(r => TrainBoardCard(r, TrainBoardCard.Type.DEPARTURE))
+                                                     .map(_.pane): _*)
     }
   }
 

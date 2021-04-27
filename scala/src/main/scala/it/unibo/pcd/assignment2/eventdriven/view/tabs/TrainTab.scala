@@ -38,14 +38,18 @@ object TrainTab {
     loader.load
     stations.setPadding(Insets(0, 5.0, 0, 5.0))
     startMonitorTrain.setOnMouseClicked(_ => {
+      startMonitorTrain.setDisable(true)
       stations.setContent(LoadingLabel().label)
       val station = trainCode.getText
       controller.startTrainInfoUpdates(station)
       updatedTrain = Some(station)
+      stopMonitorTrain.setDisable(false)
     })
     stopMonitorTrain.setOnMouseClicked(_ => {
+      stopMonitorTrain.setDisable(true)
       updatedTrain.foreach(controller.stopTrainInfoUpdates)
       updatedTrain = None
+      startMonitorTrain.setDisable(false)
     })
 
     override val tab: Tab = root

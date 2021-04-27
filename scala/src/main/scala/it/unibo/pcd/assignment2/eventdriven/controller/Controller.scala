@@ -1,8 +1,9 @@
 package it.unibo.pcd.assignment2.eventdriven.controller
 
-import io.vertx.core.Future
+import io.vertx.core.{Future, Handler}
 
 import java.time.LocalDateTime
+import scala.language.implicitConversions
 
 sealed trait Controller {
   def requestSolutions(departureStation: String, arrivalStation: String, datetimeDeparture: LocalDateTime): Unit
@@ -29,6 +30,8 @@ object Controller {
 
     Vertx.vertx().deployVerticle(this)
 
+    implicit def fromFunctionToHandler[A](f: A => Unit): Handler[A] = f.apply
+
     override def start(startPromise: Promise[Void]): Unit = {
       model = Some(TrenitaliaAPI(WebClient(getVertx)))
     }
@@ -41,25 +44,28 @@ object Controller {
       updates.getOrElse(
         updateKey,
         producer(updateKey)
-          .onSuccess(_ => {
-            consumer(_)
-            updates += updateKey -> getVertx.setPeriodic(
-              30_000,
-               _ => producer(updateKey).onSuccess(consumer(_)).onFailure(e => view.displayErrorMessage(e.getMessage))
-            )
-          })
+          .onSuccess(consumer)
+          .onSuccess(_ => updates += updateKey -> getVertx.setPeriodic(
+            30_000,
+            _ => producer(updateKey).onSuccess(consumer).onFailure(e => view.displayErrorMessage(e.getMessage))
+          ))
           .onFailure(e => view.displayErrorMessage(e.getMessage))
       )
+
+    private def stopUpdates(updateKey: String): Unit = {
+      getVertx.cancelTimer(updates(updateKey))
+      updates -= updateKey
+    }
 
     override def startTrainInfoUpdates(trainCode: String): Unit =
       model.foreach(m => startUpdates(trainCode, m.getTrainInfo, view.displayTrainInfo))
 
-    override def stopTrainInfoUpdates(trainCode: String): Unit = getVertx.cancelTimer(updates(trainCode))
+    override def stopTrainInfoUpdates(trainCode: String): Unit = stopUpdates(trainCode)
 
     override def startStationInfoUpdates(stationName: String): Unit =
       model.foreach(m => startUpdates(stationName, m.getStationInfo, view.displayStationInfo))
 
-    override def stopStationInfoUpdates(stationName: String): Unit = getVertx.cancelTimer(updates(stationName))
+    override def stopStationInfoUpdates(stationName: String): Unit = stopUpdates(stationName)
 
     override def exit(): Unit = sys.exit
   }

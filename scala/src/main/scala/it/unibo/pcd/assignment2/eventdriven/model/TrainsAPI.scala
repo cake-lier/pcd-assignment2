@@ -99,9 +99,9 @@ trait TrainsAPI {
   }
 
   type StationInfo <: {
-    def departures: Set[TrainBoardRecord]
+    def departures: List[TrainBoardRecord]
 
-    def arrivals: Set[TrainBoardRecord]
+    def arrivals: List[TrainBoardRecord]
   }
 
   import io.vertx.core.Future
