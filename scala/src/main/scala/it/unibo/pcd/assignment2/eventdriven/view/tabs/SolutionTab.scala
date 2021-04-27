@@ -5,9 +5,8 @@ import it.unibo.pcd.assignment2.eventdriven.model.Solution
 import it.unibo.pcd.assignment2.eventdriven.view.LoadingLabel
 import it.unibo.pcd.assignment2.eventdriven.view.cards.SolutionCard
 import javafx.fxml.{FXML, FXMLLoader}
-import javafx.scene.control.{Button, ChoiceBox, DatePicker, ScrollPane, TextField}
-import scalafx.application.Platform
 import scalafx.scene.layout.VBox
+import javafx.scene.control.{Button, ChoiceBox, DatePicker, ScrollPane, TextField, Tab => JavaFXTab}
 
 import java.time.{LocalDateTime, LocalTime}
 
@@ -16,11 +15,10 @@ sealed trait SolutionTab extends Tab {
 }
 
 object SolutionTab {
-  import javafx.scene.control.Tab
 
   private class SolutionTabImpl(controller: Controller) extends SolutionTab {
     @FXML
-    private var root: Tab = _
+    private var root: JavaFXTab = _
     @FXML
     private var departureStation: TextField = _
     @FXML
@@ -47,13 +45,13 @@ object SolutionTab {
       )
     })
 
-    override val tab: Tab = root
+    override val tab: JavaFXTab = root
 
-    override def displaySolutions(solutions: List[Solution]): Unit = Platform.runLater({
+    override def displaySolutions(solutions: List[Solution]): Unit = {
       val container: VBox = new VBox(5)
       container.children.setAll(solutions.map(SolutionCard(_)).map(_.pane): _*)
       solutionsField.setContent(container)
-    })
+    }
   }
 
   def apply(controller: Controller): SolutionTab = new SolutionTabImpl(controller)

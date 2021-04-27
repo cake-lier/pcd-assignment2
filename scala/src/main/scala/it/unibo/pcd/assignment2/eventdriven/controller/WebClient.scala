@@ -24,8 +24,7 @@ object WebClient {
       fromResponseToBody(webClient.get(httpsPort, host, requestURI).ssl(true).send())
 
     override def post(host: String, requestURI: String, body: Map[String, String]): Future[String] =
-      fromResponseToBody(webClient.post(httpsPort, host, requestURI))
-                                  .ssl(true)
+      fromResponseToBody(webClient.post(host, requestURI)
                                   .sendForm(MultiMap.caseInsensitiveMultiMap().addAll(body.asJava)))
 
     private def fromResponseToBody(req: Future[HttpResponse[Buffer]]): Future[String] =

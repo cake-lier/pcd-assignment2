@@ -20,10 +20,21 @@ object WebStationInfoParser extends WebStationInfoParser{
     var arrivals: Set[TrainBoardRecord] = Set()
     var departures: Set[TrainBoardRecord] = Set()
 
-    def _createTrain(trainCode: String, trainType: String, station: String, trainState: TravelState, time: String, expPlatform: String, realPlatform: String) =
-        TrainBoardRecord(Train(Some(trainCode), TrainTypeMap.map(trainType)), Station(WordUtils.capitalize(station)), trainState, LocalTime.parse(time), Some(expPlatform), _getPlatform(realPlatform))
-
-    def _getPlatform(realPlatform: String): Option[String] = if (realPlatform == "--") None else Some(realPlatform)
+    def _createTrain(trainCode: String,
+                     trainType: String,
+                     station: String,
+                     trainState: TravelState,
+                     time: String,
+                     expPlatform: String,
+                     realPlatform: String) =
+        TrainBoardRecord(
+            Train(Some(trainCode), TrainTypeMap.map(trainType)),
+            Station(WordUtils.capitalizeFully(station)),
+            trainState,
+            LocalTime.parse(time),
+            Some(expPlatform),
+            if (realPlatform == "--") None else Some(realPlatform)
+        )
 
     (JsoupBrowser().parseString(dom) >> elementList(".bloccorisultato"))
       .map(e => (e >> allText(".bloccorisultato"))
@@ -38,8 +49,8 @@ object WebStationInfoParser extends WebStationInfoParser{
           case "Per" => departures += _createTrain(n, t, s, TravelState.Delayed(r.toInt), o, bp, br)
         }
         case s"${t} ${n} ${d} ${s} Delle ore ${o} Binario Previsto: ${bp} Binario Reale: ${br} in orario" => d match {
-          case "Da" =>arrivals += _createTrain(n, t, s, TravelState.InTime, o, bp, br)
-          case "Per" =>departures += _createTrain(n, t, s, TravelState.InTime, o, bp, br)
+          case "Da" => arrivals += _createTrain(n, t, s, TravelState.InTime, o, bp, br)
+          case "Per" => departures += _createTrain(n, t, s, TravelState.InTime, o, bp, br)
         }
       }
     StationInfo(departures, arrivals)

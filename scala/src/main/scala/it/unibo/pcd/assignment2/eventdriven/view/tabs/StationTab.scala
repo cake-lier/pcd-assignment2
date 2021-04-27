@@ -6,7 +6,6 @@ import it.unibo.pcd.assignment2.eventdriven.view.LoadingLabel
 import it.unibo.pcd.assignment2.eventdriven.view.cards.TrainBoardCard
 import javafx.fxml.{FXML, FXMLLoader}
 import javafx.scene.control.{Button, ScrollPane, TextField}
-import scalafx.application.Platform
 import scalafx.scene.layout.VBox
 
 sealed trait StationTab extends Tab {
@@ -49,7 +48,7 @@ object StationTab {
 
     override val tab: Tab = root
 
-    override def displayStationInfo(stationInfo: StationInfo): Unit = Platform.runLater({
+    override def displayStationInfo(stationInfo: StationInfo): Unit = {
       val arrivalsContainer = new VBox(5)
       arrivals.setContent(arrivalsContainer)
       arrivalsContainer.children
@@ -63,7 +62,7 @@ object StationTab {
                          .setAll(stationInfo.departures.map(r => TrainBoardCard(r, TrainBoardCard.Type.DEPARTURE))
                                                        .map(_.pane)
                                                        .toSeq: _*)
-    })
+    }
   }
 
   def apply(controller: Controller): StationTab = new StationTabImpl(controller)

@@ -51,11 +51,12 @@ object View {
       contentText = message
     }.showAndWait)
 
-    override def displaySolutions(solutions: List[Solution]): Unit = solutionTab.displaySolutions(solutions)
+    override def displaySolutions(solutions: List[Solution]): Unit = Platform.runLater(solutionTab.displaySolutions(solutions))
 
-    override def displayTrainInfo(trainInfo: TrainInfo): Unit = trainTab.displayTrainInfo(trainInfo)
+    override def displayTrainInfo(trainInfo: TrainInfo): Unit = Platform.runLater(trainTab.displayTrainInfo(trainInfo))
 
-    override def displayStationInfo(stationInfo: StationInfo): Unit = stationTab.displayStationInfo(stationInfo)
+    override def displayStationInfo(stationInfo: StationInfo): Unit =
+      Platform.runLater(stationTab.displayStationInfo(stationInfo))
   }
 
   def apply(primaryStage: PrimaryStage): View = new ViewImpl(primaryStage)
