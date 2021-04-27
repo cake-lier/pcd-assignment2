@@ -9,6 +9,7 @@ import java.time.temporal.ChronoUnit
 
 sealed trait TrainInfoParser extends Parser[TrainInfo]
 
+
 object TrainInfoParser extends TrainInfoParser {
   import TimeUtils._
 
@@ -34,7 +35,7 @@ object TrainInfoParser extends TrainInfoParser {
         (departureStationJson \ "binarioProgrammatoPartenzaDescrizione").as[String],
         (departureStationJson \ "binarioEffettivoPartenzaDescrizione").asOpt[String]
       ),
-      stops.map(_fromStopToArrivalStation(_, delayMinutes))
+      stops.tail.map(_fromStopToArrivalStation(_, delayMinutes))
     )
   }
 
