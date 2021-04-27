@@ -15,7 +15,7 @@ sealed trait TrenitaliaAPI extends TrainsAPI {
   override type StationName = String
   override type TrainCode = String
   override type PlatformName = String
-  override type TrainType = ConcreteTrainType.TrainType
+  override type TrainType = ConcreteTrainType.Value
   override type Train = ConcreteTrain
   override type Station = ConcreteStation
   override type SolutionStation = ConcreteSolutionStation

@@ -3,13 +3,13 @@ package it.unibo.pcd.assignment2.eventdriven.model
 sealed trait Train {
   def trainCode: Option[String]
 
-  def trainType: TrainType.TrainType
+  def trainType: TrainType.Value
 }
 
 object Train {
-  private case class TrainImpl(trainCode: Option[String], trainType: TrainType.TrainType) extends Train
+  private case class TrainImpl(trainCode: Option[String], trainType: TrainType.Value) extends Train
 
-  def apply(trainCode: Option[String], trainType: TrainType.TrainType): Train = TrainImpl(trainCode, trainType)
+  def apply(trainCode: Option[String], trainType: TrainType.Value): Train = TrainImpl(trainCode, trainType)
 }
 
 sealed trait SolutionTrain extends Train {
@@ -22,13 +22,13 @@ sealed trait SolutionTrain extends Train {
 
 object SolutionTrain {
   private case class SolutionTrainImpl(trainCode: Option[String],
-                                       trainType: TrainType.TrainType,
+                                       trainType: TrainType.Value,
                                        departureStation: SolutionStation,
                                        arrivalStation: SolutionStation,
                                        stops: List[Stop]) extends SolutionTrain
 
   def apply(trainCode: Option[String],
-            trainType: TrainType.TrainType,
+            trainType: TrainType.Value,
             departureStation: SolutionStation,
             arrivalStation: SolutionStation,
             stops: List[Stop]): SolutionTrain =
