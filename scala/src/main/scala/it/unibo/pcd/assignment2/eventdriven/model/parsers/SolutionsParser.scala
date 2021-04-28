@@ -1,6 +1,6 @@
 package it.unibo.pcd.assignment2.eventdriven.model.parsers
 
-import it.unibo.pcd.assignment2.eventdriven.TimeUtils.fromMillisToLocalDateTime
+import it.unibo.pcd.assignment2.eventdriven.TimeUtils.millisToLocalDateTime
 import it.unibo.pcd.assignment2.eventdriven.model.{Solution, SolutionStation, SolutionTrain, Stop, TrainType}
 import org.apache.commons.text.WordUtils
 
@@ -57,9 +57,9 @@ object SolutionsParser {
           parseSolutionStation(t._2, departureStationKey, departureTimeKey),
           parseSolutionStation(t._2, arrivalStationKey, arrivalTimeKey),
           (t._2 \ stopsListKey).as[List[JsValue]]
-                             .map(o => Stop(WordUtils.capitalizeFully((o \ stationNameKey).as[String]),
-                                            parseSolutionDatetime(o, departureTimeKey),
-                                            parseSolutionDatetime(o, arrivalTimeKey)))
+                               .map(o => Stop(WordUtils.capitalizeFully((o \ stationNameKey).as[String]),
+                                              parseSolutionDatetime(o, departureTimeKey),
+                                              parseSolutionDatetime(o, arrivalTimeKey)))
         ))
   }
 

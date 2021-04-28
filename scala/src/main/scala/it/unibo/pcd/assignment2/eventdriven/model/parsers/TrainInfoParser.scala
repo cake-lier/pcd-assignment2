@@ -1,82 +1,58 @@
 package it.unibo.pcd.assignment2.eventdriven.model.parsers
 
 import it.unibo.pcd.assignment2.eventdriven.TimeUtils
+import it.unibo.pcd.assignment2.eventdriven.model.TravelState.{Delayed, Early, InTime, Nothing}
 import it.unibo.pcd.assignment2.eventdriven.model._
 import org.apache.commons.text.WordUtils
 import play.api.libs.json.{JsValue, Json}
 
-import java.time.temporal.ChronoUnit
+import java.time.LocalDateTime
 
-sealed trait TrainInfoParser extends Parser[TrainInfo]
-
-
-object TrainInfoParser extends TrainInfoParser {
+object TrainInfoParser {
   import TimeUtils._
 
-  override def parse(trainStateJson: String): TrainInfo = {
-    val json = Json.parse(trainStateJson)
-    val stops = (json \ "fermate").as[List[JsValue]]
-    val departureStationJson = stops.head
-    val delayMinutes = (json \ "ritardo").as[Int]
+  private def calculateTravelState(datetime: Option[LocalDateTime], delay: Int): TravelState = (datetime, delay) match {
+    case (Some(_), d) if d > 0 => Delayed(d)
+    case (Some(_), d) if d < 0 => Early(-d)
+    case (Some(_), _) => InTime
+    case _ => Nothing
+  }
+
+  private def extractDatetime(json: JsValue, key: String): Option[LocalDateTime] =
+    (json \ key).asOpt[Long].map(millisToLocalDateTime)
+
+  private def extractTimestampedStation(json: JsValue, nameKey: String, timestampKey: String): SolutionStation =
+    SolutionStation(WordUtils.capitalizeFully((json \ nameKey).as[String]), (json \ timestampKey).as[Long])
+
+  def apply(json: String): TrainInfo = {
+    val parsed = Json.parse(json)
     TrainInfo(
-      Train(
-        (json \ "numeroTreno").asOpt[Int].map(_.toString),
-        TrainTypeMap.map((json \ "compNumeroTreno").as[String].split(" ")(0))
+      RouteTrain(
+        (parsed \ "numeroTreno").asOpt[Int].map(_.toString),
+        TrainType.values.find(_.code == (parsed \ "categoria").as[String]).getOrElse(TrainType.AUTOBUS),
+        extractTimestampedStation(parsed, "origine", "orarioPartenza"),
+        extractTimestampedStation(parsed, "destinazione", "orarioArrivo")
       ),
-      _computeTravelState(
-        json,
-        (stops.last \ "binarioEffettivoArrivoDescrizione").asOpt[String].nonEmpty,
-        delayMinutes
-      ),
-      RouteDepartureStation(
-        WordUtils.capitalizeFully((departureStationJson \ "stazione").as[String]),
-        (departureStationJson \ "partenza_teorica").as[Long],
-        (departureStationJson \ "partenzaReale").asOpt[Long].map(fromMillisToLocalDateTime),
-        (departureStationJson \ "binarioProgrammatoPartenzaDescrizione").as[String],
-        (departureStationJson \ "binarioEffettivoPartenzaDescrizione").asOpt[String]
-      ),
-      stops.tail.map(_fromStopToArrivalStation(_, delayMinutes))
+      (parsed \ "fermate").as[List[JsValue]]
+                          .map(o => {
+                            val actualDeparture = extractDatetime(o, "partenzaReale")
+                            val actualArrival = extractDatetime(o, "arrivoReale")
+                            RouteStation(
+                              WordUtils.capitalizeFully((o \ "stazione").as[String]),
+                              extractDatetime(o, "partenza_teorica"),
+                              actualDeparture,
+                              extractDatetime(o, "arrivo_teorico"),
+                              actualArrival,
+                              (o \ "binarioProgrammatoPartenzaDescrizione")
+                                  .asOpt[String]
+                                  .orElse((o \ "binarioProgrammatoArrivoDescrizione").asOpt[String]),
+                              (o \ "binarioEffettivoPartenzaDescrizione")
+                                  .asOpt[String]
+                                  .orElse((o \ "binarioEffettivoArrivoDescrizione").asOpt[String]),
+                              calculateTravelState(actualDeparture, (o \ "ritardoPartenza").as[Int]),
+                              calculateTravelState(actualArrival, (o \ "ritardoArrivo").as[Int])
+                            )
+                          })
     )
-  }
-
-  def _computeTravelState(json: JsValue, isArrived: Boolean, delay: Int): TravelState = {
-    val isDeparted = !(json \ "nonPartito").as[Boolean]
-    if (!isDeparted) {
-      return TravelState.NotDeparted
-    }
-    if (isDeparted && isArrived) {
-      return TravelState.Arrived
-    }
-    if (isDeparted && delay > 0) {
-      return TravelState.Delayed(delay)
-    }
-    if (isDeparted && delay < 0) {
-      return TravelState.Early(delay)
-    }
-    TravelState.InTime
-  }
-
-  def _fromStopToArrivalStation(stop: JsValue, delayMinutes: Int): RouteArrivalStation = {
-    val plannedArrivalDatetime = (stop \ "arrivo_teorico").as[Long]
-    RouteArrivalStation(
-      WordUtils.capitalizeFully((stop \ "stazione").as[String]),
-      plannedArrivalDatetime,
-      Some(plannedArrivalDatetime.plus(delayMinutes, ChronoUnit.MINUTES)),
-      (stop \ "arrivo_reale").asOpt[Long].map(fromMillisToLocalDateTime),
-      (stop \ "binarioProgrammatoArrivoDescrizione").as[String],
-      (stop \ "binarioEffettivoArrivoDescrizione").asOpt[String]
-    )
-  }
-
-  object TrainTypeMap {
-    var map = Map(
-      "REG" -> TrainType.REGIONALE,
-      "FB" -> TrainType.FRECCIABIANCA,
-      "FR" -> TrainType.FRECCIAROSSA,
-      "FA" -> TrainType.FRECCIARGENTO,
-      "IC" -> TrainType.INTERCITY,
-      "RV" -> TrainType.REGIONALE_VELOCE,
-      "EC" -> TrainType.EUROCITY,
-      "ICN" -> TrainType.INTERCITY_NOTTE)
   }
 }

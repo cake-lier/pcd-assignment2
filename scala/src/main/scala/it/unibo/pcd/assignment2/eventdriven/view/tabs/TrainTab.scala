@@ -2,9 +2,9 @@ package it.unibo.pcd.assignment2.eventdriven.view.tabs
 
 import it.unibo.pcd.assignment2.eventdriven.controller.Controller
 import it.unibo.pcd.assignment2.eventdriven.model.TravelState._
-import it.unibo.pcd.assignment2.eventdriven.model.{TrainInfo, TravelState}
+import it.unibo.pcd.assignment2.eventdriven.model.{RouteStation, TrainInfo}
 import it.unibo.pcd.assignment2.eventdriven.view.LoadingLabel
-import it.unibo.pcd.assignment2.eventdriven.view.cards.{HalfwayStopCard, InitialStopCard}
+import it.unibo.pcd.assignment2.eventdriven.view.cards.StopCard
 import javafx.fxml.{FXML, FXMLLoader}
 import javafx.scene.control.{Button, ScrollPane, TextField}
 import org.apache.commons.text.WordUtils
@@ -56,14 +56,14 @@ object TrainTab {
 
     override def displayTrainInfo(trainInfo: TrainInfo): Unit = {
       val container = new VBox(5)
+      container.padding = Insets(0, 0, 5.0, 0)
       setLabelForText(
         s"${WordUtils.capitalizeFully(trainInfo.train.trainType.toString.replace("_", " "))} " +
         s"${trainInfo.train.trainCode.getOrElse("")}",
         container
       )
-      setLabelForText(getTextForState(trainInfo.state), container)
-      container.children += InitialStopCard(trainInfo.departureStation).pane
-      container.children.addAll(trainInfo.arrivalStations.map(HalfwayStopCard(_)).map(_.pane))
+      setLabelForText(getTextForState(trainInfo.stations), container)
+      container.children.addAll(trainInfo.stations.map(StopCard(_)).map(_.pane))
       stations.setContent(container)
     }
 
@@ -77,12 +77,25 @@ object TrainTab {
       container.children += label
     }
 
-    private def getTextForState(travelState: TravelState): String = travelState match {
-      case NotDeparted => "Il treno non è ancora partito"
-      case Arrived => "Il treno è già arrivato"
-      case InTime => "Il treno è in orario"
-      case t: Delayed => s"Il treno è in ritardo di ${t.delay.get} minuti"
-      case t: Early => s"Il treno è in anticipo di ${-t.delay.get} minuti"
+    private def getTextForState(stations: List[RouteStation]): String = {
+      if (stations.head.actualDepartureDatetime.isEmpty) {
+        "Il treno non è ancora partito"
+      }
+      else if (stations.last.actualArrivalDatetime.isDefined) {
+        "Il treno è già arrivato"
+      }
+      else {
+        stations.map(s => (s.departureState, s.arrivalState))
+                .findLast(p => p._1 != Nothing || p._2 != Nothing)
+                .map(p => Some(p._2).filter(_ != Nothing).getOrElse(p._1))
+                .map({
+                  case InTime => "Il treno è in orario"
+                  case Delayed(m) => s"Il treno è in ritardo di $m minuti"
+                  case Early(m) => s"Il treno è in anticipo di $m minuti"
+                  case _ => "--"
+                })
+                .getOrElse("--")
+      }
     }
   }
 

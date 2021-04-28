@@ -6,10 +6,26 @@ trait TrainsAPI {
   type PlatformName
   type TrainType
 
+  type TravelState <: {
+    def state: TravelStateEnum.State
+
+    def delay: Option[Int]
+  }
+
   type Train <: {
     def trainCode: Option[TrainCode]
 
     def trainType: TrainType
+  }
+
+  type RouteTrain <: Train {
+    def departureStation: SolutionStation
+
+    def arrivalStation: SolutionStation
+  }
+
+  type SolutionTrain <: RouteTrain {
+    def stops: List[Stop]
   }
 
   type Station <: {
@@ -28,12 +44,22 @@ trait TrainsAPI {
     def arrivalDatetime: Option[LocalDateTime]
   }
 
-  type SolutionTrain <: Train {
-    def departureStation: SolutionStation
+  type RouteStation <: Station {
+    def plannedDepartureDatetime: Option[LocalDateTime]
 
-    def arrivalStation: SolutionStation
+    def actualDepartureDatetime: Option[LocalDateTime]
 
-    def stops: List[Stop]
+    def plannedArrivalDatetime: Option[LocalDateTime]
+
+    def actualArrivalDatetime: Option[LocalDateTime]
+
+    def plannedPlatform: Option[PlatformName]
+
+    def actualPlatform: Option[PlatformName]
+
+    def departureState: TravelState
+
+    def arrivalState: TravelState
   }
 
   type Solution <: {
@@ -50,36 +76,10 @@ trait TrainsAPI {
     def arrivalStation: SolutionStation
   }
 
-  type TravelState <: {
-    def state: TravelStateEnum.State
-
-    def delay: Option[Int]
-  }
-
-  type RouteStation <: Station {
-    def plannedDatetime: LocalDateTime
-
-    def actualDatetime: Option[LocalDateTime]
-
-    def plannedPlatform: PlatformName
-
-    def actualPlatform: Option[PlatformName]
-  }
-
-  type RouteDepartureStation <: RouteStation
-
-  type RouteArrivalStation <: RouteStation {
-    def estimatedDatetime: Option[LocalDateTime]
-  }
-
   type TrainInfo <: {
-    def train: Train
+    def train: RouteTrain
 
-    def state: TravelState
-
-    def departureStation: RouteDepartureStation
-
-    def arrivalStations: List[RouteArrivalStation]
+    def stations: List[RouteStation]
   }
 
   import java.time.LocalTime

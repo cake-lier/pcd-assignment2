@@ -11,15 +11,21 @@
         <ColumnConstraints hgrow="SOMETIMES" percentWidth="100.0" />
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints percentHeight="34.0" vgrow="SOMETIMES" />
-        <RowConstraints percentHeight="33.0" vgrow="SOMETIMES" />
-        <RowConstraints percentHeight="33.0" vgrow="SOMETIMES" />
+        <RowConstraints percentHeight="20.0" vgrow="SOMETIMES" />
+        <RowConstraints percentHeight="20.0" vgrow="SOMETIMES" />
+        <RowConstraints percentHeight="20.0" vgrow="SOMETIMES" />
+        <RowConstraints percentHeight="20.0" vgrow="SOMETIMES" />
+        <RowConstraints percentHeight="20.0" vgrow="SOMETIMES" />
     </rowConstraints>
     <Label fx:id="stopTitle" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell"/>
-    <Label fx:id="plannedInfo" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell"
+    <Label fx:id="departureInfo" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell"
            GridPane.rowIndex="1" />
-    <Label fx:id="actualInfo" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell"
+    <Label fx:id="arrivalInfo" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell"
            GridPane.rowIndex="2" />
+    <Label fx:id="platformInfo" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell"
+           GridPane.rowIndex="3" />
+    <Label fx:id="stateInfo" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell"
+           GridPane.rowIndex="4" />
    <padding>
       <Insets top="5.0" />
    </padding>

@@ -1,11 +1,5 @@
 package it.unibo.pcd.assignment2.eventdriven.model
 
-object TravelStateEnum extends Enumeration {
-  type State = Value
-
-  val NOT_DEPARTED, ARRIVED, IN_TIME, DELAYED, EARLY = Value
-}
-
 sealed trait TravelState {
   def state: TravelStateEnum.State
 
@@ -15,14 +9,8 @@ sealed trait TravelState {
 object TravelState {
   import it.unibo.pcd.assignment2.eventdriven.model.TravelStateEnum.State
 
-  case object NotDeparted extends TravelState {
-    val state: State = TravelStateEnum.NOT_DEPARTED
-
-    val delay: Option[Int] = None
-  }
-
-  case object Arrived extends TravelState {
-    val state: State = TravelStateEnum.ARRIVED
+  case object Nothing extends TravelState {
+    val state: State = TravelStateEnum.NOTHING
 
     val delay: Option[Int] = None
   }

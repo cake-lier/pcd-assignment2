@@ -12,11 +12,26 @@ object Train {
   def apply(trainCode: Option[String], trainType: TrainType.Value): Train = TrainImpl(trainCode, trainType)
 }
 
-sealed trait SolutionTrain extends Train {
+sealed trait RouteTrain extends Train {
   def departureStation: SolutionStation
 
   def arrivalStation: SolutionStation
+}
 
+object RouteTrain {
+  private case class RouteTrainImpl(trainCode: Option[String],
+                                    trainType: TrainType.Value,
+                                    departureStation: SolutionStation,
+                                    arrivalStation: SolutionStation) extends RouteTrain
+
+  def apply(trainCode: Option[String],
+            trainType: TrainType.Value,
+            departureStation: SolutionStation,
+            arrivalStation: SolutionStation): RouteTrain =
+    RouteTrainImpl(trainCode, trainType, departureStation, arrivalStation)
+}
+
+sealed trait SolutionTrain extends RouteTrain {
   def stops: List[Stop]
 }
 

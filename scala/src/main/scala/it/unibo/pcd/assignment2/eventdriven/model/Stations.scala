@@ -23,51 +23,52 @@ object SolutionStation {
 }
 
 sealed trait RouteStation extends Station {
-  def plannedDatetime: LocalDateTime
+  def plannedDepartureDatetime: Option[LocalDateTime]
 
-  def actualDatetime: Option[LocalDateTime]
+  def actualDepartureDatetime: Option[LocalDateTime]
 
-  def plannedPlatform: String
+  def plannedArrivalDatetime: Option[LocalDateTime]
+
+  def actualArrivalDatetime: Option[LocalDateTime]
+
+  def plannedPlatform: Option[String]
 
   def actualPlatform: Option[String]
+
+  def departureState: TravelState
+
+  def arrivalState: TravelState
 }
 
-sealed trait RouteDepartureStation extends RouteStation
-
-object RouteDepartureStation {
-  private case class RouteDepartureStationImpl(stationName: String,
-                                               plannedDatetime: LocalDateTime,
-                                               actualDatetime: Option[LocalDateTime],
-                                               plannedPlatform: String,
-                                               actualPlatform: Option[String]) extends RouteDepartureStation
+object RouteStation {
+  private case class RouteStationImpl(stationName: String,
+                                      plannedDepartureDatetime: Option[LocalDateTime],
+                                      actualDepartureDatetime: Option[LocalDateTime],
+                                      plannedArrivalDatetime: Option[LocalDateTime],
+                                      actualArrivalDatetime: Option[LocalDateTime],
+                                      plannedPlatform: Option[String],
+                                      actualPlatform: Option[String],
+                                      departureState: TravelState,
+                                      arrivalState: TravelState) extends RouteStation
 
   def apply(stationName: String,
-            plannedDatetime: LocalDateTime,
-            actualDatetime: Option[LocalDateTime],
-            plannedPlatform: String,
-            actualPlatform: Option[String]): RouteDepartureStation =
-    RouteDepartureStationImpl(stationName, plannedDatetime, actualDatetime, plannedPlatform, actualPlatform)
-}
-
-sealed trait RouteArrivalStation extends RouteStation {
-  def estimatedDatetime: Option[LocalDateTime]
-}
-
-object RouteArrivalStation {
-  private case class RouteArrivalStationImpl(stationName: String,
-                                             plannedDatetime: LocalDateTime,
-                                             estimatedDatetime: Option[LocalDateTime],
-                                             actualDatetime: Option[LocalDateTime],
-                                             plannedPlatform: String,
-                                             actualPlatform: Option[String]) extends RouteArrivalStation
-
-  def apply(stationName: String,
-            plannedDatetime: LocalDateTime,
-            estimatedDatetime: Option[LocalDateTime],
-            actualDatetime: Option[LocalDateTime],
-            plannedPlatform: String,
-            actualPlatform: Option[String]): RouteArrivalStation =
-    RouteArrivalStationImpl(stationName, plannedDatetime, estimatedDatetime, actualDatetime, plannedPlatform, actualPlatform)
+            plannedDepartureDatetime: Option[LocalDateTime],
+            actualDepartureDatetime: Option[LocalDateTime],
+            plannedArrivalDatetime: Option[LocalDateTime],
+            actualArrivalDatetime: Option[LocalDateTime],
+            plannedPlatform: Option[String],
+            actualPlatform: Option[String],
+            departureState: TravelState,
+            arrivalState: TravelState): RouteStation =
+    RouteStationImpl(stationName,
+                     plannedDepartureDatetime,
+                     actualDepartureDatetime,
+                     plannedArrivalDatetime,
+                     actualArrivalDatetime,
+                     plannedPlatform,
+                     actualPlatform,
+                     departureState,
+                     arrivalState)
 }
 
 sealed trait Stop extends Station {
