@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<Tab fx:id="root" closable="false" text="Stato stazione" xmlns="https://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
+<Tab closable="false" text="Stato stazione" xmlns="https://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
         <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                     AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

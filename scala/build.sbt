@@ -22,3 +22,5 @@ libraryDependencies ++= Seq(
     "org.apache.commons" % "commons-lang3" % "3.12.0",
     "com.google.guava" % "guava" % "23.0"
 ) ++ javaFXModules
+
+wartremoverErrors ++= Warts.allBut(Wart.Var, Wart.ImplicitConversion)

@@ -1,11 +1,13 @@
 package it.unibo.pcd.assignment2.eventdriven.model.parsers
 
+import it.unibo.pcd.assignment2.eventdriven.AnyOps.AnyOps
 import it.unibo.pcd.assignment2.eventdriven.TimeUtils.millisToLocalDateTime
-import it.unibo.pcd.assignment2.eventdriven.model.{Solution, SolutionStation, SolutionTrain, Stop, TrainType}
+import it.unibo.pcd.assignment2.eventdriven.model._
 import org.apache.commons.text.WordUtils
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDateTime, ZoneId}
+import java.util.Locale
 
 object SolutionsParser {
   import play.api.libs.json.{JsLookupResult, JsValue, Json}
@@ -40,7 +42,7 @@ object SolutionsParser {
     val arrivalTimeKey = "arrivaltime"
     val stopsListKey = "stoplist"
     val stationNameKey = "stationname"
-    val trainCodePattern = ".* ([0-9]+)$".r
+    val trainCodePattern = ".* ([0-9A-Za-z]+)$".r
     val trainTypePattern = "^([a-zA-Z]+ [a-zA-Z]+|[a-zA-Z]+) .*".r
     json.as[List[JsValue]]
         .zip(detail.as[List[JsValue]])
@@ -51,12 +53,15 @@ object SolutionsParser {
           },
           (t._1 \ trainIdKey).as[String] match {
             case trainTypePattern(trainType) =>
-              TrainType.values.toList.find(_.toString == trainType.replace(" ", "_").toUpperCase).getOrElse(TrainType.AUTOBUS)
-            case _ => TrainType.AUTOBUS
+              TrainType.values
+                       .find(_.toString.toUpperCase(Locale.ITALY) === trainType.toUpperCase(Locale.ITALY))
+                       .getOrElse(TrainType.Autobus)
+            case _ => TrainType.Autobus
           },
           parseSolutionStation(t._2, departureStationKey, departureTimeKey),
           parseSolutionStation(t._2, arrivalStationKey, arrivalTimeKey),
-          (t._2 \ stopsListKey).as[List[JsValue]]
+          (t._2 \ stopsListKey).asOpt[List[JsValue]]
+                               .getOrElse(List[JsValue]())
                                .map(o => Stop(WordUtils.capitalizeFully((o \ stationNameKey).as[String]),
                                               parseSolutionDatetime(o, departureTimeKey),
                                               parseSolutionDatetime(o, arrivalTimeKey)))

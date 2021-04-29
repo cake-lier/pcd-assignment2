@@ -15,7 +15,7 @@ sealed trait TrenitaliaAPI extends TrainsAPI {
   override type StationName = String
   override type TrainCode = String
   override type PlatformName = String
-  override type TrainType = ConcreteTrainType.Value
+  override type TrainType = ConcreteTrainType
   override type Train = ConcreteTrain
   override type Station = ConcreteStation
   override type SolutionStation = ConcreteSolutionStation
@@ -33,7 +33,7 @@ sealed trait TrenitaliaAPI extends TrainsAPI {
 object TrenitaliaAPI {
   import play.api.libs.json.Json
 
-  private class TrenitaliaAPIImpl(webClient: WebClient) extends TrenitaliaAPI {
+  private final class TrenitaliaAPIImpl(webClient: WebClient) extends TrenitaliaAPI {
 
     private def encode(url: String): String = UrlEscapers.urlFragmentEscaper.escape(url)
 
@@ -47,7 +47,7 @@ object TrenitaliaAPI {
                             s"origin=${encode(departureStation)}" +
                             s"&destination=${encode(arrivalStation)}" +
                             s"&adate=${datetimeDeparture.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}" +
-                            s"&atime=${datetimeDeparture.getHour}" +
+                            s"&atime=${datetimeDeparture.getHour.toString}" +
                             "&arflag=A&adultno=1&childno=0&direction=A&frecce=false&onlyRegional=false"
       webClient.get(host, getSolutionsURI)
                .compose(b => FutureUtils.all(Json.parse(b)
@@ -64,7 +64,8 @@ object TrenitaliaAPI {
       webClient.get(viaggiatrenoHost,s"${viaggiatrenoAPI}cercaNumeroTreno/$trainCode")
                .compose(c => webClient.get(
                  viaggiatrenoHost,
-                 s"${viaggiatrenoAPI}andamentoTreno/${StationCodeParser(c)}/$trainCode/${System.currentTimeMillis()}"
+                 s"${viaggiatrenoAPI}andamentoTreno/${StationCodeParser(c)}/$trainCode/" +
+                 s"${System.currentTimeMillis().toString}"
                ))
                .compose(r => Future.succeededFuture(TrainInfoParser(r)))
     }

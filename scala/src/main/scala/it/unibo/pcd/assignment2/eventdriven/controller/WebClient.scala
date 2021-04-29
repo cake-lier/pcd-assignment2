@@ -16,7 +16,7 @@ object WebClient {
 
   import scala.jdk.CollectionConverters._
 
-  private case class WebClientImpl(vertx: Vertx) extends WebClient {
+  private final case class WebClientImpl(vertx: Vertx) extends WebClient {
     val webClient: WebClientSession = WebClientSession.create(VertxWebClient.create(vertx))
     val httpsPort = 443
 

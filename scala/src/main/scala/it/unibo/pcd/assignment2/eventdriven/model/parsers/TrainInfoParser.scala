@@ -1,5 +1,6 @@
 package it.unibo.pcd.assignment2.eventdriven.model.parsers
 
+import it.unibo.pcd.assignment2.eventdriven.AnyOps.AnyOps
 import it.unibo.pcd.assignment2.eventdriven.TimeUtils
 import it.unibo.pcd.assignment2.eventdriven.model.TravelState.{Delayed, Early, InTime, Nothing}
 import it.unibo.pcd.assignment2.eventdriven.model._
@@ -29,7 +30,7 @@ object TrainInfoParser {
     TrainInfo(
       RouteTrain(
         (parsed \ "numeroTreno").asOpt[Int].map(_.toString),
-        TrainType.values.find(_.code == (parsed \ "categoria").as[String]).getOrElse(TrainType.AUTOBUS),
+        TrainType.values.find(_.code === (parsed \ "categoria").as[String]).getOrElse(TrainType.Autobus),
         extractTimestampedStation(parsed, "origine", "orarioPartenza"),
         extractTimestampedStation(parsed, "destinazione", "orarioArrivo")
       ),

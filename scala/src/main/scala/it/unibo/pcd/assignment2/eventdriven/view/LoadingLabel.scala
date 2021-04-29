@@ -8,7 +8,7 @@ sealed trait LoadingLabel {
 }
 
 object LoadingLabel {
-  private class LoadingLabelImpl extends LoadingLabel {
+  private final class LoadingLabelImpl extends LoadingLabel {
     override val label = new Label("Caricamento in corso")
 
     label.maxWidth = Double.MaxValue

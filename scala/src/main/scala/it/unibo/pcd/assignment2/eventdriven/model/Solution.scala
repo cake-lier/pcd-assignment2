@@ -19,12 +19,12 @@ sealed trait Solution {
 }
 
 object Solution {
-  private case class SolutionImpl(trains: List[SolutionTrain],
-                                  price: Option[Double],
-                                  bookable: Boolean,
-                                  saleable: Boolean,
-                                  departureStation: SolutionStation,
-                                  arrivalStation: SolutionStation) extends Solution
+  private final case class SolutionImpl(trains: List[SolutionTrain],
+                                        price: Option[Double],
+                                        bookable: Boolean,
+                                        saleable: Boolean,
+                                        departureStation: SolutionStation,
+                                        arrivalStation: SolutionStation) extends Solution
 
   def apply(trains: List[SolutionTrain],
             price: Option[Double],

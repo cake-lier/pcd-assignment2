@@ -3,6 +3,7 @@ package it.unibo.pcd.assignment2.eventdriven.view
 import it.unibo.pcd.assignment2.eventdriven.controller.Controller
 import it.unibo.pcd.assignment2.eventdriven.model.{Solution, StationInfo, TrainInfo}
 import it.unibo.pcd.assignment2.eventdriven.view.tabs.{SolutionTab, StationTab, TrainTab}
+import it.unibo.pcd.assignment2.eventdriven.AnyOps.discard
 import javafx.fxml.FXMLLoader
 import javafx.scene.control._
 import scalafx.application.JFXApp.PrimaryStage
@@ -22,7 +23,7 @@ sealed trait View {
 }
 
 object View {
-  private class ViewImpl(primaryStage: PrimaryStage) extends View {
+  private final class ViewImpl(primaryStage: PrimaryStage) extends View {
     private val controller: Controller = Controller(this)
     private val solutionTab: SolutionTab = SolutionTab(controller)
     private val trainTab: TrainTab = TrainTab(controller)
@@ -31,8 +32,8 @@ object View {
     val loader = new FXMLLoader
     loader.setController(this)
     loader.setLocation(ClassLoader.getSystemResource("main.fxml"))
-    val root: TabPane = loader.load
-    root.getTabs.setAll(solutionTab.tab, trainTab.tab, stationTab.tab)
+    val root: TabPane = loader.load[TabPane]
+    discard { root.getTabs.setAll(solutionTab.tab, trainTab.tab, stationTab.tab) }
     val scene = new Scene
     scene.root.value = root
     primaryStage.scene = scene
@@ -59,5 +60,5 @@ object View {
       Platform.runLater(stationTab.displayStationInfo(stationInfo))
   }
 
-  def apply(primaryStage: PrimaryStage): View = new ViewImpl(primaryStage)
+  def apply(primaryStage: PrimaryStage): Unit = new ViewImpl(primaryStage)
 }

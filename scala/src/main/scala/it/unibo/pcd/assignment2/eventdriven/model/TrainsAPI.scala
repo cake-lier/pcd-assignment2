@@ -7,7 +7,7 @@ trait TrainsAPI {
   type TrainType
 
   type TravelState <: {
-    def state: TravelStateEnum.State
+    def state: TravelStateEnum
 
     def delay: Option[Int]
   }

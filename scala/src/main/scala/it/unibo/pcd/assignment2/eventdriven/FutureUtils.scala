@@ -7,6 +7,6 @@ import java.util
 
 object FutureUtils {
   def all[A](futures: List[Future[A]]): Future[List[A]] =
-      CompositeFuture.all(futures.asJava.asInstanceOf[util.List[Future[_]]])
+      CompositeFuture.all(new util.ArrayList(futures.asJava))
                      .compose(_ => Future.succeededFuture(futures.map(_.result)))
 }

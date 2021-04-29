@@ -1,6 +1,7 @@
 package it.unibo.pcd.assignment2.eventdriven.view.cards
 
 import it.unibo.pcd.assignment2.eventdriven.model.Solution
+import it.unibo.pcd.assignment2.eventdriven.AnyOps.discard
 import javafx.fxml.{FXML, FXMLLoader}
 import javafx.scene.control.{Accordion, Label}
 import javafx.scene.layout.GridPane
@@ -10,22 +11,20 @@ import java.time.format.DateTimeFormatter
 object SolutionCard {
   private class SolutionCardImpl(solution: Solution) extends Card[GridPane] {
     @FXML
-    private var root: GridPane = _
+    private var trainsField: Accordion = new Accordion
     @FXML
-    private var trainsField: Accordion = _
+    private var priceField: Label = new Label
     @FXML
-    private var priceField: Label = _
+    private var bookableField: Label = new Label
     @FXML
-    private var bookableField: Label = _
+    private var departureField: Label = new Label
     @FXML
-    private var departureField: Label = _
-    @FXML
-    private var arrivalField: Label = _
+    private var arrivalField: Label = new Label
 
     val loader = new FXMLLoader
     loader.setController(this)
     loader.setLocation(ClassLoader.getSystemResource("solutionCard.fxml"))
-    loader.load()
+    override val pane: GridPane = loader.load[GridPane]
     priceField.setText(solution.price
                                .filter(_ => solution.saleable)
                                .map(d => f"Costo: $d%.2f €")
@@ -36,9 +35,7 @@ object SolutionCard {
                            s"il ${solution.departureStation.datetime.format(dateTimeFormatter)}")
     arrivalField.setText(s"${arrivalField.getText}${solution.arrivalStation.stationName} " +
                          s"il ${solution.arrivalStation.datetime.format(dateTimeFormatter)}")
-    trainsField.getPanes.setAll(solution.trains.map(TrainCard(_)).map(_.pane): _*)
-
-    override val pane: GridPane = root
+    discard { trainsField.getPanes.setAll(solution.trains.map(TrainCard(_)).map(_.pane): _*) }
   }
 
   def apply(solution: Solution): Card[GridPane] = new SolutionCardImpl(solution)

@@ -24,9 +24,10 @@ object Controller {
   import it.unibo.pcd.assignment2.eventdriven.model.TrenitaliaAPI
   import it.unibo.pcd.assignment2.eventdriven.view.View
 
-  private class ControllerImpl(view: View) extends AbstractVerticle with Controller {
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
+  private final class ControllerImpl(view: View) extends AbstractVerticle with Controller {
     private var model: Option[TrenitaliaAPI] = None
-    private var updates: Map[String, Long] = Map()
+    private var updates: Map[String, Long] = Map[String, Long]()
 
     Vertx.vertx().deployVerticle(this)
 
@@ -41,21 +42,21 @@ object Controller {
            .foreach(_.onSuccess(view.displaySolutions(_)).onFailure(e => view.displayErrorMessage(e.getMessage)))
 
     private def startUpdates[A](updateKey: String, producer: String => Future[A], consumer: A => Unit): Unit =
-      updates.getOrElse(
-        updateKey,
-        producer(updateKey)
-          .onSuccess(consumer)
-          .onSuccess(_ => updates += updateKey -> getVertx.setPeriodic(
-            30_000,
-            _ => producer(updateKey).onSuccess(consumer).onFailure(e => view.displayErrorMessage(e.getMessage))
-          ))
-          .onFailure(e => view.displayErrorMessage(e.getMessage))
-      )
+      updates.get(updateKey) match {
+        case Some(_) =>
+        case None => producer(updateKey).onSuccess(consumer)
+                                        .onSuccess(_ => updates += updateKey -> getVertx.setPeriodic(
+                                          30_000,
+                                          _ => producer(updateKey).onSuccess(consumer)
+                                                                  .onFailure(e => view.displayErrorMessage(e.getMessage))
+                                        ))
+                                        .onFailure(e => view.displayErrorMessage(e.getMessage))
+      }
 
-    private def stopUpdates(updateKey: String): Unit = {
-      getVertx.cancelTimer(updates(updateKey))
+    private def stopUpdates(updateKey: String): Unit = updates.get(updateKey).foreach(k => {
+      getVertx.cancelTimer(k)
       updates -= updateKey
-    }
+    })
 
     override def startTrainInfoUpdates(trainCode: String): Unit =
       model.foreach(m => startUpdates(trainCode, m.getTrainInfo, view.displayTrainInfo))

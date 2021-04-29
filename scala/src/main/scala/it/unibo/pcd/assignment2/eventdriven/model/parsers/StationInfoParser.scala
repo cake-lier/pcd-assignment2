@@ -1,5 +1,6 @@
 package it.unibo.pcd.assignment2.eventdriven.model.parsers
 
+import it.unibo.pcd.assignment2.eventdriven.AnyOps.AnyOps
 import it.unibo.pcd.assignment2.eventdriven.model.{Station, StationInfo, Train, TrainBoardRecord, TrainType, TravelState}
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract.allText
@@ -15,10 +16,9 @@ object StationInfoParser {
                  " (in orario|ritardo [0-9]+)$").r
     records.flatMap {
       case regex(trainType, trainCode, direction, stationName, time, expectedPlatform, actualPlatform, trainState) =>
-        if (direction == "Per" && !departure || direction == "Da" && departure) None else
+        if (direction === "Per" && !departure || direction === "Da" && departure) None else
           Some(TrainBoardRecord(
-            Train(Some(trainCode),
-                  TrainType.values.find(_.code == trainType).getOrElse(TrainType.AUTOBUS)),
+            Train(Some(trainCode), TrainType.values.find(_.code == trainType).getOrElse(TrainType.Autobus)),
             Station(WordUtils.capitalizeFully(stationName)),
             trainState match {
               case "in orario" => TravelState.InTime

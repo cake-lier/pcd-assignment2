@@ -1,7 +1,10 @@
 package it.unibo.pcd.assignment2.eventdriven.model
 
-object TravelStateEnum extends Enumeration {
-  type State = Value
+sealed trait TravelStateEnum
 
-  val NOTHING, IN_TIME, DELAYED, EARLY = Value
+object TravelStateEnum {
+  case object Nothing extends TravelStateEnum
+  case object InTime extends TravelStateEnum
+  case object Delayed extends TravelStateEnum
+  case object Early extends TravelStateEnum
 }

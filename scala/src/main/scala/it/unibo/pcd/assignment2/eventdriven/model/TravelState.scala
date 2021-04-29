@@ -1,34 +1,33 @@
 package it.unibo.pcd.assignment2.eventdriven.model
 
 sealed trait TravelState {
-  def state: TravelStateEnum.State
+  def state: TravelStateEnum
 
   def delay: Option[Int]
 }
 
 object TravelState {
-  import it.unibo.pcd.assignment2.eventdriven.model.TravelStateEnum.State
 
   case object Nothing extends TravelState {
-    val state: State = TravelStateEnum.NOTHING
+    val state: TravelStateEnum = TravelStateEnum.Nothing
 
     val delay: Option[Int] = None
   }
 
   case object InTime extends TravelState {
-    val state: State = TravelStateEnum.IN_TIME
+    val state: TravelStateEnum = TravelStateEnum.InTime
 
     val delay: Option[Int] = None
   }
 
-  case class Delayed(delayMin: Int) extends TravelState {
-    val state: State = TravelStateEnum.DELAYED
+  final case class Delayed(delayMin: Int) extends TravelState {
+    val state: TravelStateEnum = TravelStateEnum.Delayed
 
     val delay: Option[Int] = Some(delayMin)
   }
 
-  case class Early(earlyMin: Int) extends TravelState {
-    val state: State = TravelStateEnum.EARLY
+  final case class Early(earlyMin: Int) extends TravelState {
+    val state: TravelStateEnum = TravelStateEnum.Early
 
     val delay: Option[Int] = Some(-earlyMin)
   }

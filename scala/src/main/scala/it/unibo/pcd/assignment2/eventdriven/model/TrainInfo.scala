@@ -7,7 +7,7 @@ sealed trait TrainInfo {
 }
 
 object TrainInfo {
-  private case class TrainInfoImpl(train: RouteTrain, stations: List[RouteStation]) extends TrainInfo
+  private final case class TrainInfoImpl(train: RouteTrain, stations: List[RouteStation]) extends TrainInfo
 
   def apply(train: RouteTrain, stations: List[RouteStation]): TrainInfo = TrainInfoImpl(train, stations)
 }
