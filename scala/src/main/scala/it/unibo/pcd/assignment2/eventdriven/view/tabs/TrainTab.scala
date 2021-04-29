@@ -1,13 +1,13 @@
 package it.unibo.pcd.assignment2.eventdriven.view.tabs
 
+import it.unibo.pcd.assignment2.eventdriven.AnyOps.{discard, AnyOps}
 import it.unibo.pcd.assignment2.eventdriven.controller.Controller
 import it.unibo.pcd.assignment2.eventdriven.model.TravelState._
-import it.unibo.pcd.assignment2.eventdriven.model.{TrainInfo, TravelState}
+import it.unibo.pcd.assignment2.eventdriven.model.{RouteStation, TrainInfo}
 import it.unibo.pcd.assignment2.eventdriven.view.LoadingLabel
-import it.unibo.pcd.assignment2.eventdriven.view.cards.{HalfwayStopCard, InitialStopCard}
+import it.unibo.pcd.assignment2.eventdriven.view.cards.StopCard
 import javafx.fxml.{FXML, FXMLLoader}
 import javafx.scene.control.{Button, ScrollPane, TextField}
-import org.apache.commons.text.WordUtils
 import scalafx.geometry.Insets
 import scalafx.scene.control.Label
 import scalafx.scene.layout.VBox
@@ -19,23 +19,21 @@ sealed trait TrainTab extends Tab {
 object TrainTab {
   import javafx.scene.control.Tab
 
-  private class TrainTabImpl(controller: Controller) extends TrainTab {
+  private final class TrainTabImpl(controller: Controller) extends TrainTab {
     private var updatedTrain: Option[String] = None
     @FXML
-    private var root: Tab = _
+    private var trainCode: TextField = new TextField
     @FXML
-    private var trainCode: TextField = _
+    private var startMonitorTrain: Button = new Button
     @FXML
-    private var startMonitorTrain: Button = _
+    private var stopMonitorTrain: Button = new Button
     @FXML
-    private var stopMonitorTrain: Button = _
-    @FXML
-    private var stations: ScrollPane = _
+    private var stations: ScrollPane = new ScrollPane
 
     private val loader = new FXMLLoader
     loader.setController(this)
     loader.setLocation(ClassLoader.getSystemResource("trainTab.fxml"))
-    loader.load
+    override val tab: Tab = loader.load[Tab]
     stations.setPadding(Insets(0, 5.0, 0, 5.0))
     startMonitorTrain.setOnMouseClicked(_ => {
       startMonitorTrain.setDisable(true)
@@ -52,18 +50,12 @@ object TrainTab {
       startMonitorTrain.setDisable(false)
     })
 
-    override val tab: Tab = root
-
     override def displayTrainInfo(trainInfo: TrainInfo): Unit = {
       val container = new VBox(5)
-      setLabelForText(
-        s"${WordUtils.capitalizeFully(trainInfo.train.trainType.toString.replace("_", " "))} " +
-        s"${trainInfo.train.trainCode.getOrElse("")}",
-        container
-      )
-      setLabelForText(getTextForState(trainInfo.state), container)
-      container.children += InitialStopCard(trainInfo.departureStation).pane
-      container.children.addAll(trainInfo.arrivalStations.map(HalfwayStopCard(_)).map(_.pane))
+      container.padding = Insets(0, 0, 5.0, 0)
+      setLabelForText(s"${trainInfo.train.trainType.toString} ${trainInfo.train.trainCode.getOrElse("")}", container)
+      setLabelForText(getTextForState(trainInfo.stations), container)
+      discard { container.children ++= trainInfo.stations.map(StopCard(_)).map(_.pane) }
       stations.setContent(container)
     }
 
@@ -74,15 +66,28 @@ object TrainTab {
       label.margin = Insets(5.0, 0, 0, 0)
       label.styleClass = List("gridCell")
       label.applyCss()
-      container.children += label
+      discard { container.children += label }
     }
 
-    private def getTextForState(travelState: TravelState): String = travelState match {
-      case NotDeparted => "Il treno non è ancora partito"
-      case Arrived => "Il treno è già arrivato"
-      case InTime => "Il treno è in orario"
-      case t: Delayed => s"Il treno è in ritardo di ${t.delay.get} minuti"
-      case t: Early => s"Il treno è in anticipo di ${-t.delay.get} minuti"
+    private def getTextForState(stations: List[RouteStation]): String = {
+      if (stations.headOption.exists(_.actualDepartureDatetime.isEmpty)) {
+        "Il treno non è ancora partito"
+      }
+      else if (stations.lastOption.exists(_.actualArrivalDatetime.isDefined)) {
+        "Il treno è già arrivato"
+      }
+      else {
+        stations.map(s => (s.departureState, s.arrivalState))
+                .findLast(p => p._1 =/= Nothing || p._2 =/= Nothing)
+                .map(p => Some(p._2).filter(_ =/= Nothing).getOrElse(p._1))
+                .map({
+                  case InTime => "Il treno è in orario"
+                  case Delayed(m) => s"Il treno è in ritardo di ${m.toString} minuti"
+                  case Early(m) => s"Il treno è in anticipo di ${m.toString} minuti"
+                  case _ => "--"
+                })
+                .getOrElse("--")
+      }
     }
   }
 

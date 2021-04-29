@@ -16,7 +16,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.collections.FXCollections?>
 
-<Tab fx:id="root" closable="false" xmlns="https://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" text="Cerca soluzioni">
+<Tab closable="false" xmlns="https://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" text="Cerca soluzioni">
     <AnchorPane>
         <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                     AnchorPane.topAnchor="0.0">

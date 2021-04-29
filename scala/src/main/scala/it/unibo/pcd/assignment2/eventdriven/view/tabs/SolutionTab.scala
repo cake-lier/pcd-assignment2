@@ -4,6 +4,7 @@ import it.unibo.pcd.assignment2.eventdriven.controller.Controller
 import it.unibo.pcd.assignment2.eventdriven.model.Solution
 import it.unibo.pcd.assignment2.eventdriven.view.LoadingLabel
 import it.unibo.pcd.assignment2.eventdriven.view.cards.SolutionCard
+import it.unibo.pcd.assignment2.eventdriven.AnyOps.discard
 import javafx.fxml.{FXML, FXMLLoader}
 import scalafx.scene.layout.VBox
 import javafx.scene.control.{Button, ChoiceBox, DatePicker, ScrollPane, TextField, Tab => JavaFXTab}
@@ -15,27 +16,24 @@ sealed trait SolutionTab extends Tab {
 }
 
 object SolutionTab {
-
-  private class SolutionTabImpl(controller: Controller) extends SolutionTab {
+  private final class SolutionTabImpl(controller: Controller) extends SolutionTab {
     @FXML
-    private var root: JavaFXTab = _
+    private var departureStation: TextField = new TextField
     @FXML
-    private var departureStation: TextField = _
+    private var arrivalStation: TextField = new TextField
     @FXML
-    private var arrivalStation: TextField = _
+    private var departureDate: DatePicker = new DatePicker
     @FXML
-    private var departureDate: DatePicker = _
+    private var departureTime: ChoiceBox[String] = new ChoiceBox[String]
     @FXML
-    private var departureTime: ChoiceBox[String] = _
+    private var searchButton: Button = new Button
     @FXML
-    private var searchButton: Button = _
-    @FXML
-    private var solutionsField: ScrollPane = _
+    private var solutionsField: ScrollPane = new ScrollPane
 
     val loader = new FXMLLoader
     loader.setController(this)
     loader.setLocation(ClassLoader.getSystemResource("solutionTab.fxml"))
-    loader.load
+    override val tab: JavaFXTab = loader.load[JavaFXTab]
     searchButton.setOnMouseClicked(_ => {
       solutionsField.setContent(LoadingLabel().label)
       controller.requestSolutions(
@@ -45,11 +43,9 @@ object SolutionTab {
       )
     })
 
-    override val tab: JavaFXTab = root
-
     override def displaySolutions(solutions: List[Solution]): Unit = {
       val container: VBox = new VBox(5)
-      container.children.setAll(solutions.map(SolutionCard(_)).map(_.pane): _*)
+      discard { container.children ++= solutions.map(SolutionCard(_)).map(_.pane) }
       solutionsField.setContent(container)
     }
   }

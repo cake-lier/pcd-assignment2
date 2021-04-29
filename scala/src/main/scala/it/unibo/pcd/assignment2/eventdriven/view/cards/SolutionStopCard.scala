@@ -10,24 +10,20 @@ import java.time.format.DateTimeFormatter
 object SolutionStopCard {
   private class SolutionStopCardImpl(stop: Stop, index: Int) extends Card[Pane] {
     @FXML
-    private var root: GridPane = _
+    private var stopTitle: Label = new Label()
     @FXML
-    private var stopTitle: Label = _
+    private var stopArrival: Label = new Label()
     @FXML
-    private var stopArrival: Label = _
-    @FXML
-    private var stopDeparture: Label = _
+    private var stopDeparture: Label = new Label()
 
     val loader = new FXMLLoader
     loader.setController(this)
     loader.setLocation(ClassLoader.getSystemResource("solutionStopCard.fxml"))
-    loader.load()
-    stopTitle.setText(s"${index}ª fermata: ${stop.stationName}")
+    override val pane: Pane = loader.load[GridPane]
+    stopTitle.setText(s"${index.toString}ª fermata: ${stop.stationName}")
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'alle' HH:mm")
     stopArrival.setText(s"${stopArrival.getText}${stop.arrivalDatetime.map(_.format(formatter)).getOrElse("--")}")
     stopDeparture.setText(s"${stopDeparture.getText}${stop.departureDatetime.map(_.format(formatter)).getOrElse("--")}")
-
-    override def pane: Pane = root
   }
 
   def apply(stop: Stop, index: Int): Card[Pane] = new SolutionStopCardImpl(stop, index)

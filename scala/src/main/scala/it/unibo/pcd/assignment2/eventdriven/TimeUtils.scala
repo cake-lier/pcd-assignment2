@@ -4,6 +4,6 @@ import java.time.{Instant, LocalDateTime, ZoneId}
 import scala.language.implicitConversions
 
 object TimeUtils {
-  implicit def fromMillisToLocalDateTime(millis: Long): LocalDateTime =
+  implicit def millisToLocalDateTime(millis: Long): LocalDateTime =
     Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault).toLocalDateTime
 }

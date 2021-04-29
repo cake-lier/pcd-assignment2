@@ -5,7 +5,7 @@ import io.vertx.core.Future
 import it.unibo.pcd.assignment2.eventdriven.FutureUtils
 import it.unibo.pcd.assignment2.eventdriven.controller.WebClient
 import it.unibo.pcd.assignment2.eventdriven.model.parsers._
-import it.unibo.pcd.assignment2.eventdriven.model.{RouteArrivalStation => ConcreteRouteArrivalStation, RouteDepartureStation => ConcreteRouteDepartureStation, RouteStation => ConcreteRouteStation, Solution => ConcreteSolution, SolutionStation => ConcreteSolutionStation, SolutionTrain => ConcreteSolutionTrain, Station => ConcreteStation, StationInfo => ConcreteStationInfo, Stop => ConcreteStop, Train => ConcreteTrain, TrainBoardRecord => ConcreteTrainBoardRecord, TrainInfo => ConcreteTrainInfo, TrainType => ConcreteTrainType, TravelState => ConcreteTravelState}
+import it.unibo.pcd.assignment2.eventdriven.model.{RouteTrain => ConcreteRouteTrain, RouteStation => ConcreteRouteStation, Solution => ConcreteSolution, SolutionStation => ConcreteSolutionStation, SolutionTrain => ConcreteSolutionTrain, Station => ConcreteStation, StationInfo => ConcreteStationInfo, Stop => ConcreteStop, Train => ConcreteTrain, TrainBoardRecord => ConcreteTrainBoardRecord, TrainInfo => ConcreteTrainInfo, TrainType => ConcreteTrainType, TravelState => ConcreteTravelState}
 import play.api.libs.json.JsValue
 
 import java.time.LocalDateTime
@@ -15,7 +15,7 @@ sealed trait TrenitaliaAPI extends TrainsAPI {
   override type StationName = String
   override type TrainCode = String
   override type PlatformName = String
-  override type TrainType = ConcreteTrainType.Value
+  override type TrainType = ConcreteTrainType
   override type Train = ConcreteTrain
   override type Station = ConcreteStation
   override type SolutionStation = ConcreteSolutionStation
@@ -23,8 +23,7 @@ sealed trait TrenitaliaAPI extends TrainsAPI {
   override type Solution = ConcreteSolution
   override type TravelState = ConcreteTravelState
   override type RouteStation = ConcreteRouteStation
-  override type RouteDepartureStation = ConcreteRouteDepartureStation
-  override type RouteArrivalStation = ConcreteRouteArrivalStation
+  override type RouteTrain = ConcreteRouteTrain
   override type TrainInfo = ConcreteTrainInfo
   override type TrainBoardRecord = ConcreteTrainBoardRecord
   override type StationInfo = ConcreteStationInfo
@@ -34,8 +33,7 @@ sealed trait TrenitaliaAPI extends TrainsAPI {
 object TrenitaliaAPI {
   import play.api.libs.json.Json
 
-  private class TrenitaliaAPIImpl(webClient: WebClient) extends TrenitaliaAPI {
-    val viaggiatrenoHost = "www.viaggiatreno.it"
+  private final class TrenitaliaAPIImpl(webClient: WebClient) extends TrenitaliaAPI {
 
     private def encode(url: String): String = UrlEscapers.urlFragmentEscaper.escape(url)
 
@@ -49,7 +47,7 @@ object TrenitaliaAPI {
                             s"origin=${encode(departureStation)}" +
                             s"&destination=${encode(arrivalStation)}" +
                             s"&adate=${datetimeDeparture.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}" +
-                            s"&atime=${datetimeDeparture.getHour}" +
+                            s"&atime=${datetimeDeparture.getHour.toString}" +
                             "&arflag=A&adultno=1&childno=0&direction=A&frecce=false&onlyRegional=false"
       webClient.get(host, getSolutionsURI)
                .compose(b => FutureUtils.all(Json.parse(b)
@@ -59,14 +57,21 @@ object TrenitaliaAPI {
                                         .compose(s => Future.succeededFuture(SolutionsParser(b, s))))
     }
 
+    private val viaggiatrenoHost = "www.viaggiatreno.it"
+    private val viaggiatrenoAPI = "/viaggiatrenonew/resteasy/viaggiatreno/"
+
     override def getTrainInfo(trainCode: TrainCode): Future[TrainInfo] = {
-      webClient.get(viaggiatrenoHost,s"/viaggiatrenonew/resteasy/viaggiatreno/cercaNumeroTreno/$trainCode")
-        .compose(c=>webClient.get(viaggiatrenoHost,s"/viaggiatrenomobile/resteasy/viaggiatreno/andamentoTreno/${WebStationCodeFromTripParser.parse(c)}/$trainCode/${System.currentTimeMillis()}"))
-        .compose(r=>Future.succeededFuture(TrainInfoParser.parse(r)))
+      webClient.get(viaggiatrenoHost,s"${viaggiatrenoAPI}cercaNumeroTreno/$trainCode")
+               .compose(c => webClient.get(
+                 viaggiatrenoHost,
+                 s"${viaggiatrenoAPI}andamentoTreno/${StationCodeParser(c)}/$trainCode/" +
+                 s"${System.currentTimeMillis().toString}"
+               ))
+               .compose(r => Future.succeededFuture(TrainInfoParser(r)))
     }
 
     override def getStationInfo(stationName: StationName): Future[StationInfo] =
-      webClient.get(viaggiatrenoHost,s"/viaggiatrenonew/resteasy/viaggiatreno/cercaStazione/${encode(stationName)}")
+      webClient.get(viaggiatrenoHost,s"${viaggiatrenoAPI}cercaStazione/${encode(stationName)}")
                .compose(s => webClient.post(
                  viaggiatrenoHost,
                  s"/vt_pax_internet/mobile/stazione",

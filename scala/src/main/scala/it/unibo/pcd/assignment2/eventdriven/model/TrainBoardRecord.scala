@@ -17,12 +17,12 @@ sealed trait TrainBoardRecord {
 }
 
 object TrainBoardRecord {
-  private case class TrainBoardRecordImpl(train: Train,
-                                          station: Station,
-                                          state: TravelState,
-                                          time: LocalTime,
-                                          expectedPlatform: Option[String],
-                                          actualPlatform: Option[String]) extends TrainBoardRecord
+  private final case class TrainBoardRecordImpl(train: Train,
+                                                station: Station,
+                                                state: TravelState,
+                                                time: LocalTime,
+                                                expectedPlatform: Option[String],
+                                                actualPlatform: Option[String]) extends TrainBoardRecord
 
   def apply(train: Train,
             station: Station,

@@ -7,21 +7,21 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane fx:id="root" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity"
+<GridPane maxHeight="50" maxWidth="1.7976931348623157E308"
           stylesheets="@style.css" vgap="5.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" percentWidth="100.0" />
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints percentHeight="80.0" vgrow="SOMETIMES" />
-        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
-        <RowConstraints percentHeight="5.0" vgrow="SOMETIMES" />
+        <RowConstraints percentHeight="80.0" vgrow="NEVER" />
+        <RowConstraints percentHeight="5.0" vgrow="NEVER" />
+        <RowConstraints percentHeight="5.0" vgrow="NEVER" />
+        <RowConstraints percentHeight="5.0" vgrow="NEVER" />
+        <RowConstraints percentHeight="5.0" vgrow="NEVER" />
     </rowConstraints>
     <Label fx:id="bookableField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell"
            GridPane.rowIndex="2" />
-    <Accordion fx:id="trainsField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
+    <Accordion fx:id="trainsField" maxWidth="1.7976931348623157E308" />
     <Label fx:id="priceField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell"
            GridPane.rowIndex="1" />
     <Label fx:id="departureField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gridCell"
