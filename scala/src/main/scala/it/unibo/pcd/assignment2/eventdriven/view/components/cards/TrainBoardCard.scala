@@ -1,23 +1,26 @@
-package it.unibo.pcd.assignment2.eventdriven.view.cards
+package it.unibo.pcd.assignment2.eventdriven.view.components.cards
 
-import it.unibo.pcd.assignment2.eventdriven.AnyOps.AnyOps
-import it.unibo.pcd.assignment2.eventdriven.model.{TrainBoardRecord, TravelStateEnum}
-import javafx.scene.layout.Pane
-
-import java.time.format.DateTimeFormatter
+import javafx.scene.layout.GridPane
 
 object TrainBoardCard {
-  import javafx.fxml.{FXML, FXMLLoader}
-  import javafx.scene.control.Label
-  import javafx.scene.layout.GridPane
-
   sealed trait Type
   object Type {
-    case object Departure extends Type
-    case object Arrival extends Type
+    final case object Departure extends Type
+    final case object Arrival extends Type
   }
 
-  private class TrainBoardCardImpl(trainBoardRecord: TrainBoardRecord, cardType: Type) extends Card[Pane] {
+  import it.unibo.pcd.assignment2.eventdriven.AnyOps.AnyOps
+  import it.unibo.pcd.assignment2.eventdriven.model.{TrainBoardRecord, TravelStateEnum}
+  import it.unibo.pcd.assignment2.eventdriven.view.components.Component.AbstractComponent
+  import it.unibo.pcd.assignment2.eventdriven.view.components.Component
+  import javafx.scene.layout.Pane
+  import javafx.scene.control.Label
+  import javafx.fxml.FXML
+
+  import java.time.format.DateTimeFormatter
+
+  private class TrainBoardCardImpl(trainBoardRecord: TrainBoardRecord, cardType: Type)
+    extends AbstractComponent[Pane]("trainBoardCard.fxml") {
     @FXML
     private var trainBoardTitle: Label = new Label
     @FXML
@@ -27,10 +30,7 @@ object TrainBoardCard {
     @FXML
     private var trainBoardExpectedPlatform: Label = new Label
 
-    val loader = new FXMLLoader
-    loader.setController(this)
-    loader.setLocation(ClassLoader.getSystemResource("trainBoardCard.fxml"))
-    override val pane: Pane = loader.load[GridPane]
+    override val inner: Pane = loader.load[GridPane]
     val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     trainBoardTitle.setText(s"${trainBoardRecord.train.trainType.toString} " +
                             s"${trainBoardRecord.train.trainCode.getOrElse("")} " +
@@ -50,6 +50,6 @@ object TrainBoardCard {
     trainBoardExpectedPlatform.setText(s"Binario effettivo: ${trainBoardRecord.actualPlatform.getOrElse("--")}")
   }
 
-  def apply(trainBoardRecord: TrainBoardRecord, cardType: Type): Card[Pane] =
+  def apply(trainBoardRecord: TrainBoardRecord, cardType: Type): Component[Pane] =
     new TrainBoardCardImpl(trainBoardRecord, cardType)
 }

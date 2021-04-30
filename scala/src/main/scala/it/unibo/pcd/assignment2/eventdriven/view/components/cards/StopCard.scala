@@ -1,31 +1,32 @@
-package it.unibo.pcd.assignment2.eventdriven.view.cards
+package it.unibo.pcd.assignment2.eventdriven.view.components.cards
 
-import it.unibo.pcd.assignment2.eventdriven.AnyOps.AnyOps
-import it.unibo.pcd.assignment2.eventdriven.model.{RouteStation, TravelState}
-import it.unibo.pcd.assignment2.eventdriven.model.TravelState.{Delayed, Early, InTime, Nothing}
-import javafx.fxml.{FXML, FXMLLoader}
-import javafx.scene.control.Label
-import javafx.scene.layout.{GridPane, Pane}
-
-import java.time.format.DateTimeFormatter
+import javafx.scene.layout.GridPane
 
 object StopCard {
-  private class StopCardImpl(station: RouteStation) extends Card[Pane] {
-    @FXML
-    private var stopTitle: Label = new Label()
-    @FXML
-    private var departureInfo: Label = new Label()
-    @FXML
-    private var arrivalInfo: Label = new Label()
-    @FXML
-    private var platformInfo: Label = new Label()
-    @FXML
-    private var stateInfo: Label = new Label()
+  import it.unibo.pcd.assignment2.eventdriven.AnyOps.AnyOps
+  import it.unibo.pcd.assignment2.eventdriven.model.{RouteStation, TravelState}
+  import it.unibo.pcd.assignment2.eventdriven.model.TravelState.{Delayed, Early, InTime, Nothing}
+  import it.unibo.pcd.assignment2.eventdriven.view.components.Component.AbstractComponent
+  import it.unibo.pcd.assignment2.eventdriven.view.components.Component
 
-    private val loader = new FXMLLoader
-    loader.setController(this)
-    loader.setLocation(ClassLoader.getSystemResource("stopCard.fxml"))
-    override val pane: Pane = loader.load[GridPane]
+  import java.time.format.DateTimeFormatter
+  import javafx.fxml.FXML
+  import javafx.scene.control.Label
+  import javafx.scene.layout.Pane
+
+  private class StopCardImpl(station: RouteStation) extends AbstractComponent[Pane]("stopCard.fxml") {
+    @FXML
+    private var stopTitle: Label = new Label
+    @FXML
+    private var departureInfo: Label = new Label
+    @FXML
+    private var arrivalInfo: Label = new Label
+    @FXML
+    private var platformInfo: Label = new Label
+    @FXML
+    private var stateInfo: Label = new Label
+
+    override val inner: Pane = loader.load[GridPane]
     stopTitle.setText(station.stationName)
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'alle' HH:mm")
     departureInfo.setText(
@@ -61,6 +62,6 @@ object StopCard {
     }
   }
 
-  def apply(station: RouteStation): Card[Pane] = new StopCardImpl(station)
+  def apply(station: RouteStation): Component[Pane] = new StopCardImpl(station)
 }
 

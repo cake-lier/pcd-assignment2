@@ -1,22 +1,28 @@
-package it.unibo.pcd.assignment2.eventdriven.view.tabs
+package it.unibo.pcd.assignment2.eventdriven.view.components.tabs
 
-import it.unibo.pcd.assignment2.eventdriven.controller.Controller
 import it.unibo.pcd.assignment2.eventdriven.model.Solution
-import it.unibo.pcd.assignment2.eventdriven.view.LoadingLabel
-import it.unibo.pcd.assignment2.eventdriven.view.cards.SolutionCard
-import it.unibo.pcd.assignment2.eventdriven.AnyOps.discard
-import javafx.fxml.{FXML, FXMLLoader}
-import scalafx.scene.layout.VBox
-import javafx.scene.control.{Button, ChoiceBox, DatePicker, ScrollPane, TextField, Tab => JavaFXTab}
+import it.unibo.pcd.assignment2.eventdriven.view.components.Component.AbstractComponent
+import it.unibo.pcd.assignment2.eventdriven.view.components.Component
+import javafx.scene.control.Tab
 
-import java.time.{LocalDateTime, LocalTime}
-
-sealed trait SolutionTab extends Tab {
+sealed trait SolutionTab extends Component[Tab] {
  def displaySolutions(solutions: List[Solution]): Unit
 }
 
 object SolutionTab {
-  private final class SolutionTabImpl(controller: Controller) extends SolutionTab {
+  import it.unibo.pcd.assignment2.eventdriven.controller.Controller
+  import it.unibo.pcd.assignment2.eventdriven.model.Solution
+  import it.unibo.pcd.assignment2.eventdriven.view.components.cards.SolutionCard
+  import it.unibo.pcd.assignment2.eventdriven.AnyOps.discard
+  import it.unibo.pcd.assignment2.eventdriven.view.components.LoadingLabel
+  import javafx.fxml.FXML
+  import javafx.scene.control._
+  import scalafx.scene.layout.VBox
+
+  import java.time.{LocalDateTime, LocalTime}
+
+  private final class SolutionTabImpl(controller: Controller) extends AbstractComponent[Tab]("solutionTab.fxml")
+    with SolutionTab {
     @FXML
     private var departureStation: TextField = new TextField
     @FXML
@@ -30,12 +36,9 @@ object SolutionTab {
     @FXML
     private var solutionsField: ScrollPane = new ScrollPane
 
-    val loader = new FXMLLoader
-    loader.setController(this)
-    loader.setLocation(ClassLoader.getSystemResource("solutionTab.fxml"))
-    override val tab: JavaFXTab = loader.load[JavaFXTab]
+    override val inner: Tab = loader.load[Tab]
     searchButton.setOnMouseClicked(_ => {
-      solutionsField.setContent(LoadingLabel().label)
+      solutionsField.setContent(LoadingLabel().inner)
       controller.requestSolutions(
         departureStation.getText,
         arrivalStation.getText,
@@ -45,7 +48,7 @@ object SolutionTab {
 
     override def displaySolutions(solutions: List[Solution]): Unit = {
       val container: VBox = new VBox(5)
-      discard { container.children ++= solutions.map(SolutionCard(_)).map(_.pane) }
+      discard { container.children ++= solutions.map(SolutionCard(_)) }
       solutionsField.setContent(container)
     }
   }

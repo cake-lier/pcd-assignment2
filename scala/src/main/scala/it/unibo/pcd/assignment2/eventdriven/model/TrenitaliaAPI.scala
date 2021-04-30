@@ -4,12 +4,13 @@ import com.google.common.net.UrlEscapers
 import io.vertx.core.Future
 import it.unibo.pcd.assignment2.eventdriven.FutureUtils
 import it.unibo.pcd.assignment2.eventdriven.controller.WebClient
+import it.unibo.pcd.assignment2.eventdriven.model.{RouteStation => ConcreteRouteStation, RouteTrain => ConcreteRouteTrain, Solution => ConcreteSolution, SolutionStation => ConcreteSolutionStation, SolutionTrain => ConcreteSolutionTrain, Station => ConcreteStation, StationInfo => ConcreteStationInfo, Stop => ConcreteStop, Train => ConcreteTrain, TrainBoardRecord => ConcreteTrainBoardRecord, TrainInfo => ConcreteTrainInfo, TrainType => ConcreteTrainType, TravelState => ConcreteTravelState}
 import it.unibo.pcd.assignment2.eventdriven.model.parsers._
-import it.unibo.pcd.assignment2.eventdriven.model.{RouteTrain => ConcreteRouteTrain, RouteStation => ConcreteRouteStation, Solution => ConcreteSolution, SolutionStation => ConcreteSolutionStation, SolutionTrain => ConcreteSolutionTrain, Station => ConcreteStation, StationInfo => ConcreteStationInfo, Stop => ConcreteStop, Train => ConcreteTrain, TrainBoardRecord => ConcreteTrainBoardRecord, TrainInfo => ConcreteTrainInfo, TrainType => ConcreteTrainType, TravelState => ConcreteTravelState}
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsArray, JsValue}
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import scala.util.Try
 
 sealed trait TrenitaliaAPI extends TrainsAPI {
   override type StationName = String
@@ -50,11 +51,13 @@ object TrenitaliaAPI {
                             s"&atime=${datetimeDeparture.getHour.toString}" +
                             "&arflag=A&adultno=1&childno=0&direction=A&frecce=false&onlyRegional=false"
       webClient.get(host, getSolutionsURI)
-               .compose(b => FutureUtils.all(Json.parse(b)
-                                                 .as[List[JsValue]]
-                                                 .map(o => (o \ "idsolution").as[String])
-                                                 .map(i => webClient.get(host, s"$solutionsURI/$i/details")))
-                                        .compose(s => Future.succeededFuture(SolutionsParser(b, s))))
+               .compose(r =>
+                 Try(Json.parse(r))
+                   .map(s => FutureUtils.all(s.as[List[JsValue]]
+                                              .map(o => (o \ "idsolution").as[String])
+                                              .map(i => webClient.get(host, s"$solutionsURI/$i/details"))))
+                   .getOrElse(Future.failedFuture("Non è stata trovata alcuna soluzione"))
+                   .compose(l => Future.succeededFuture(SolutionsParser(r, l))))
     }
 
     private val viaggiatrenoHost = "www.viaggiatreno.it"
@@ -62,21 +65,28 @@ object TrenitaliaAPI {
 
     override def getTrainInfo(trainCode: TrainCode): Future[TrainInfo] = {
       webClient.get(viaggiatrenoHost,s"${viaggiatrenoAPI}cercaNumeroTreno/$trainCode")
-               .compose(c => webClient.get(
-                 viaggiatrenoHost,
-                 s"${viaggiatrenoAPI}andamentoTreno/${StationCodeParser(c)}/$trainCode/" +
-                 s"${System.currentTimeMillis().toString}"
-               ))
+               .compose(r =>
+                 Option(r)
+                   .map(c => webClient.get(
+                     viaggiatrenoHost,
+                     s"${viaggiatrenoAPI}andamentoTreno/${StationCodeParser(c)}/$trainCode/" +
+                     s"${System.currentTimeMillis().toString}"
+                   ))
+                   .getOrElse(Future.failedFuture("Il codice treno non è stato trovato")))
                .compose(r => Future.succeededFuture(TrainInfoParser(r)))
     }
 
     override def getStationInfo(stationName: StationName): Future[StationInfo] =
       webClient.get(viaggiatrenoHost,s"${viaggiatrenoAPI}cercaStazione/${encode(stationName)}")
-               .compose(s => webClient.post(
-                 viaggiatrenoHost,
-                 s"/vt_pax_internet/mobile/stazione",
-                 Map("codiceStazione" -> StationNameParser(s))
-               ))
+               .compose(r =>
+                 Option(r)
+                   .filter(s => Json.parse(s).as[JsArray].value.nonEmpty)
+                   .map(s => webClient.post(
+                     viaggiatrenoHost,
+                     s"/vt_pax_internet/mobile/stazione",
+                     Map("codiceStazione" -> StationNameParser(s))
+                   ))
+                   .getOrElse(Future.failedFuture("La stazione non è stata trovata")))
                .compose(d => Future.succeededFuture(StationInfoParser(d)))
   }
 

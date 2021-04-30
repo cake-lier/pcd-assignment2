@@ -1,5 +1,7 @@
 package it.unibo.pcd.assignment2.eventdriven
 
+import scala.language.implicitConversions
+
 object AnyOps {
   @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   implicit final class AnyOps[A](self: A) {
@@ -10,7 +12,7 @@ object AnyOps {
 
   @specialized
   def discard[A](eval: A): Unit = {
-    val _: A = eval
+    val _: Any = eval
     ()
   }
 }

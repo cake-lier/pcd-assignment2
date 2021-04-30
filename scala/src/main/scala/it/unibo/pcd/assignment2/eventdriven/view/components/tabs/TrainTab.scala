@@ -1,25 +1,31 @@
-package it.unibo.pcd.assignment2.eventdriven.view.tabs
+package it.unibo.pcd.assignment2.eventdriven.view.components.tabs
 
-import it.unibo.pcd.assignment2.eventdriven.AnyOps.{discard, AnyOps}
-import it.unibo.pcd.assignment2.eventdriven.controller.Controller
-import it.unibo.pcd.assignment2.eventdriven.model.TravelState._
-import it.unibo.pcd.assignment2.eventdriven.model.{RouteStation, TrainInfo}
-import it.unibo.pcd.assignment2.eventdriven.view.LoadingLabel
-import it.unibo.pcd.assignment2.eventdriven.view.cards.StopCard
-import javafx.fxml.{FXML, FXMLLoader}
-import javafx.scene.control.{Button, ScrollPane, TextField}
-import scalafx.geometry.Insets
-import scalafx.scene.control.Label
-import scalafx.scene.layout.VBox
+import it.unibo.pcd.assignment2.eventdriven.model.TrainInfo
+import it.unibo.pcd.assignment2.eventdriven.view.components.Component
+import javafx.scene.control.Tab
+import scalafx.scene.layout.Pane
 
-sealed trait TrainTab extends Tab {
- def displayTrainInfo(trainInfo: TrainInfo): Unit
+sealed trait TrainTab extends Component[Tab] {
+  def displayTrainInfo(trainInfo: TrainInfo): Unit
+
+  def suspendTrainMonitoring(): Unit
 }
 
 object TrainTab {
-  import javafx.scene.control.Tab
+  import it.unibo.pcd.assignment2.eventdriven.AnyOps.{discard, AnyOps}
+  import it.unibo.pcd.assignment2.eventdriven.controller.Controller
+  import it.unibo.pcd.assignment2.eventdriven.view.components.Component.AbstractComponent
+  import it.unibo.pcd.assignment2.eventdriven.model.{RouteStation, TrainInfo}
+  import it.unibo.pcd.assignment2.eventdriven.model.TravelState._
+  import it.unibo.pcd.assignment2.eventdriven.view.components.cards.StopCard
+  import it.unibo.pcd.assignment2.eventdriven.view.components.LoadingLabel
+  import javafx.fxml.FXML
+  import javafx.scene.control.{Button, ScrollPane, TextField}
+  import scalafx.geometry.Insets
+  import scalafx.scene.control.Label
+  import scalafx.scene.layout.VBox
 
-  private final class TrainTabImpl(controller: Controller) extends TrainTab {
+  private final class TrainTabImpl(controller: Controller) extends AbstractComponent[Tab]("trainTab.fxml") with TrainTab {
     private var updatedTrain: Option[String] = None
     @FXML
     private var trainCode: TextField = new TextField
@@ -30,24 +36,19 @@ object TrainTab {
     @FXML
     private var stations: ScrollPane = new ScrollPane
 
-    private val loader = new FXMLLoader
-    loader.setController(this)
-    loader.setLocation(ClassLoader.getSystemResource("trainTab.fxml"))
-    override val tab: Tab = loader.load[Tab]
+    override val inner: Tab = loader.load[Tab]
     stations.setPadding(Insets(0, 5.0, 0, 5.0))
     startMonitorTrain.setOnMouseClicked(_ => {
       startMonitorTrain.setDisable(true)
-      stations.setContent(LoadingLabel().label)
+      stations.setContent(LoadingLabel().inner)
       val station = trainCode.getText
       controller.startTrainInfoUpdates(station)
       updatedTrain = Some(station)
       stopMonitorTrain.setDisable(false)
     })
     stopMonitorTrain.setOnMouseClicked(_ => {
-      stopMonitorTrain.setDisable(true)
       updatedTrain.foreach(controller.stopTrainInfoUpdates)
-      updatedTrain = None
-      startMonitorTrain.setDisable(false)
+      suspendTrainMonitoring()
     })
 
     override def displayTrainInfo(trainInfo: TrainInfo): Unit = {
@@ -55,8 +56,15 @@ object TrainTab {
       container.padding = Insets(0, 0, 5.0, 0)
       setLabelForText(s"${trainInfo.train.trainType.toString} ${trainInfo.train.trainCode.getOrElse("")}", container)
       setLabelForText(getTextForState(trainInfo.stations), container)
-      discard { container.children ++= trainInfo.stations.map(StopCard(_)).map(_.pane) }
+      discard { container.children ++= trainInfo.stations.map(StopCard(_)) }
       stations.setContent(container)
+    }
+
+    override def suspendTrainMonitoring(): Unit = {
+      stopMonitorTrain.setDisable(true)
+      updatedTrain = None
+      startMonitorTrain.setDisable(false)
+      stations.setContent(new Pane)
     }
 
     private def setLabelForText(text: String, container: VBox): Unit = {

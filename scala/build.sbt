@@ -14,13 +14,17 @@ lazy val javaFXModules = {
 }
 
 libraryDependencies ++= Seq(
-    "io.vertx" % "vertx-core" % "4.0.3",
-    "io.vertx" % "vertx-web-client" % "4.0.3",
-    "org.scalafx" %% "scalafx" % "16.0.0-R22",
-    "com.typesafe.play" %% "play-json" % "2.10.0-RC2",
-    "net.ruippeixotog" %% "scala-scraper" % "2.2.0",
-    "org.apache.commons" % "commons-lang3" % "3.12.0",
-    "com.google.guava" % "guava" % "23.0"
+  "io.vertx" % "vertx-core" % "4.0.3",
+  "io.vertx" % "vertx-web-client" % "4.0.3",
+  "org.scalafx" %% "scalafx" % "16.0.0-R22",
+  "com.typesafe.play" %% "play-json" % "2.10.0-RC2",
+  "net.ruippeixotog" %% "scala-scraper" % "2.2.0",
+  "org.apache.commons" % "commons-lang3" % "3.12.0",
+  "com.google.guava" % "guava" % "23.0"
 ) ++ javaFXModules
+
+scalacOptions ++= Seq(
+  "-deprecation",
+)
 
 wartremoverErrors ++= Warts.allBut(Wart.Var, Wart.ImplicitConversion)

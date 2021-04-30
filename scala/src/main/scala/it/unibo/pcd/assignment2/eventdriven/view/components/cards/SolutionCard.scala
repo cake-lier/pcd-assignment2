@@ -1,15 +1,17 @@
-package it.unibo.pcd.assignment2.eventdriven.view.cards
-
-import it.unibo.pcd.assignment2.eventdriven.model.Solution
-import it.unibo.pcd.assignment2.eventdriven.AnyOps.discard
-import javafx.fxml.{FXML, FXMLLoader}
-import javafx.scene.control.{Accordion, Label}
-import javafx.scene.layout.GridPane
-
-import java.time.format.DateTimeFormatter
+package it.unibo.pcd.assignment2.eventdriven.view.components.cards
 
 object SolutionCard {
-  private class SolutionCardImpl(solution: Solution) extends Card[GridPane] {
+  import it.unibo.pcd.assignment2.eventdriven.model.Solution
+  import it.unibo.pcd.assignment2.eventdriven.AnyOps.discard
+  import it.unibo.pcd.assignment2.eventdriven.view.components.Component.AbstractComponent
+  import it.unibo.pcd.assignment2.eventdriven.view.components.Component
+  import javafx.fxml.FXML
+  import javafx.scene.control.{Accordion, Label}
+  import javafx.scene.layout.GridPane
+
+  import java.time.format.DateTimeFormatter
+
+  private class SolutionCardImpl(solution: Solution) extends AbstractComponent[GridPane]("solutionCard.fxml") {
     @FXML
     private var trainsField: Accordion = new Accordion
     @FXML
@@ -21,10 +23,7 @@ object SolutionCard {
     @FXML
     private var arrivalField: Label = new Label
 
-    val loader = new FXMLLoader
-    loader.setController(this)
-    loader.setLocation(ClassLoader.getSystemResource("solutionCard.fxml"))
-    override val pane: GridPane = loader.load[GridPane]
+    override val inner: GridPane = loader.load[GridPane]
     priceField.setText(solution.price
                                .filter(_ => solution.saleable)
                                .map(d => f"Costo: $d%.2f €")
@@ -35,8 +34,8 @@ object SolutionCard {
                            s"il ${solution.departureStation.datetime.format(dateTimeFormatter)}")
     arrivalField.setText(s"${arrivalField.getText}${solution.arrivalStation.stationName} " +
                          s"il ${solution.arrivalStation.datetime.format(dateTimeFormatter)}")
-    discard { trainsField.getPanes.setAll(solution.trains.map(TrainCard(_)).map(_.pane): _*) }
+    discard { trainsField.getPanes.setAll(solution.trains.map(TrainCard(_).inner): _*) }
   }
 
-  def apply(solution: Solution): Card[GridPane] = new SolutionCardImpl(solution)
+  def apply(solution: Solution): Component[GridPane] = new SolutionCardImpl(solution)
 }
