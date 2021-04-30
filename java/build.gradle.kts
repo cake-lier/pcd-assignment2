@@ -18,6 +18,8 @@ repositories {
 dependencies {
     implementation(fileTree("lib").also { it.include("**/*.jar") })
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.0-M1")
+    implementation("io.reactivex.rxjava3:rxjava:3.0.13-RC2")
+
 }
 
 tasks.test {
