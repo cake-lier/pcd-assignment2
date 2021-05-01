@@ -1,20 +1,20 @@
 package it.unibo.pcd.assignment2.eventdriven.view.components.cards
 
-import javafx.scene.layout.GridPane
-
+/** A card to display the information contained in a [[it.unibo.pcd.assignment2.eventdriven.model.Stop]]. */
 object StopCard {
   import it.unibo.pcd.assignment2.eventdriven.AnyOps.AnyOps
-  import it.unibo.pcd.assignment2.eventdriven.model.{RouteStation, TravelState}
+  import it.unibo.pcd.assignment2.eventdriven.model.{Stop, TravelState}
   import it.unibo.pcd.assignment2.eventdriven.model.TravelState.{Delayed, Early, InTime, Nothing}
-  import it.unibo.pcd.assignment2.eventdriven.view.components.Component.AbstractComponent
   import it.unibo.pcd.assignment2.eventdriven.view.components.Component
-
-  import java.time.format.DateTimeFormatter
+  import it.unibo.pcd.assignment2.eventdriven.view.components.Component.AbstractComponent
   import javafx.fxml.FXML
   import javafx.scene.control.Label
-  import javafx.scene.layout.Pane
+  import javafx.scene.layout.{GridPane, Pane}
 
-  private class StopCardImpl(station: RouteStation) extends AbstractComponent[Pane]("stopCard.fxml") {
+  import java.time.format.DateTimeFormatter
+
+  /* Implementation of a card for displaying a Stop. */
+  private class StopCardImpl(stop: Stop) extends AbstractComponent[Pane](fxmlFileName = "stopCard.fxml") {
     @FXML
     private var stopTitle: Label = new Label
     @FXML
@@ -27,33 +27,33 @@ object StopCard {
     private var stateInfo: Label = new Label
 
     override val inner: Pane = loader.load[GridPane]
-    stopTitle.setText(station.stationName)
-    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'alle' HH:mm")
+    stopTitle.setText(stop.stationName)
+    val datetimePattern = "dd/MM/yyyy 'alle' HH:mm"
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(datetimePattern)
+    val noInfoAvailableMessage = "--"
     departureInfo.setText(
-      station.plannedDepartureDatetime
-             .map(p => s"Partenza programmata: ${p.format(formatter)}    " +
-                       s"${station.actualDepartureDatetime
-                                  .map(a => s"Partenza effettiva: ${a.format(formatter)} ")
-                                  .getOrElse("")}")
-             .getOrElse("--")
+      stop.plannedDepartureDatetime
+          .map(p => s"Partenza programmata: ${p.format(formatter)}    " +
+                    s"${stop.actualDepartureDatetime.map(a => s"Partenza effettiva: ${a.format(formatter)} ").getOrElse("")}")
+          .getOrElse(noInfoAvailableMessage)
     )
     arrivalInfo.setText(
-      station.plannedArrivalDatetime
-             .map(p => s"Arrivo programmato: ${p.format(formatter)}    " +
-                       s"${station.actualArrivalDatetime.map(a => s"Arrivo effettivo: ${a.format(formatter)}")
-                                                        .getOrElse("")}")
-             .getOrElse("--")
+      stop.plannedArrivalDatetime
+          .map(p => s"Arrivo programmato: ${p.format(formatter)}    " +
+                    s"${stop.actualArrivalDatetime.map(a => s"Arrivo effettivo: ${a.format(formatter)}").getOrElse("")}")
+          .getOrElse(noInfoAvailableMessage)
     )
-    platformInfo.setText(s"Binario programmato: ${station.plannedPlatform.getOrElse("--")}    " +
-                         s"Binario effettivo: ${station.actualPlatform.getOrElse("--")}")
-    stateInfo.setText((station.arrivalState, station.departureState) match {
+    platformInfo.setText(s"Binario programmato: ${stop.plannedPlatform.getOrElse(noInfoAvailableMessage)}    " +
+                         s"Binario effettivo: ${stop.actualPlatform.getOrElse(noInfoAvailableMessage)}")
+    stateInfo.setText((stop.arrivalState, stop.departureState) match {
       case (a, d) if a =/= Nothing && d =/= Nothing => s"Il treno è arrivato ${getTextFromState(a)} ed è partito " +
-                                                     s"${getTextFromState(d)}"
+                                                       s"${getTextFromState(d)}"
       case (a, _) if a =/= Nothing => s"Il treno è arrivato ${getTextFromState(a)} e non è partito"
       case (a, d) if a === Nothing && d =/= Nothing => s"Il treno è partito ${getTextFromState(d)}"
-      case _ => "--"
+      case _ => noInfoAvailableMessage
     })
 
+    /* Returns the text to display for the given TravelState. */
     private def getTextFromState(travelState: TravelState): String = travelState match {
       case InTime => "in orario"
       case Delayed(m) => s"con ${m.toString} minuti di ritardo"
@@ -62,6 +62,11 @@ object StopCard {
     }
   }
 
-  def apply(station: RouteStation): Component[Pane] = new StopCardImpl(station)
+  /** Creates a new instance of a [[Component]] for displaying a [[Stop]].
+   *
+   *  @param stop the [[Stop]] which information is to display
+   *  @return a new instance of a [[Component]] for displaying a [[Stop]]
+   */
+  def apply(stop: Stop): Component[Pane] = new StopCardImpl(stop)
 }
 

@@ -1,17 +1,11 @@
 package it.unibo.pcd.assignment2.eventdriven.model
 
-import com.google.common.net.UrlEscapers
-import io.vertx.core.Future
-import it.unibo.pcd.assignment2.eventdriven.FutureUtils
-import it.unibo.pcd.assignment2.eventdriven.controller.WebClient
-import it.unibo.pcd.assignment2.eventdriven.model.{RouteStation => ConcreteRouteStation, RouteTrain => ConcreteRouteTrain, Solution => ConcreteSolution, SolutionStation => ConcreteSolutionStation, SolutionTrain => ConcreteSolutionTrain, Station => ConcreteStation, StationInfo => ConcreteStationInfo, Stop => ConcreteStop, Train => ConcreteTrain, TrainBoardRecord => ConcreteTrainBoardRecord, TrainInfo => ConcreteTrainInfo, TrainType => ConcreteTrainType, TravelState => ConcreteTravelState}
-import it.unibo.pcd.assignment2.eventdriven.model.parsers._
-import play.api.libs.json.{JsArray, JsValue}
+import it.unibo.pcd.assignment2.eventdriven.model.{Route => ConcreteRoute, Solution => ConcreteSolution, Stage => ConcreteStage, Station => ConcreteStation, StationInfo => ConcreteStationInfo, Stop => ConcreteStop, TimestampedStation => ConcreteTimestampedStation, Train => ConcreteTrain, TrainBoardRecord => ConcreteTrainBoardRecord, TrainInfo => ConcreteTrainInfo, TrainType => ConcreteTrainType, Transport => ConcreteTransport, TravelState => ConcreteTravelState}
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import scala.util.Try
-
+/** A [[TrainsAPI]] for Trenitalia trains.
+ *
+ *  The instantiation is made through its companion object.
+ */
 sealed trait TrenitaliaAPI extends TrainsAPI {
   override type StationName = String
   override type TrainCode = String
@@ -19,23 +13,34 @@ sealed trait TrenitaliaAPI extends TrainsAPI {
   override type TrainType = ConcreteTrainType
   override type Train = ConcreteTrain
   override type Station = ConcreteStation
-  override type SolutionStation = ConcreteSolutionStation
-  override type SolutionTrain = ConcreteSolutionTrain
+  override type TimestampedStation = ConcreteTimestampedStation
+  override type Transport = ConcreteTransport
   override type Solution = ConcreteSolution
   override type TravelState = ConcreteTravelState
-  override type RouteStation = ConcreteRouteStation
-  override type RouteTrain = ConcreteRouteTrain
+  override type Stop = ConcreteStop
+  override type Route = ConcreteRoute
   override type TrainInfo = ConcreteTrainInfo
   override type TrainBoardRecord = ConcreteTrainBoardRecord
   override type StationInfo = ConcreteStationInfo
-  override type Stop = ConcreteStop
+  override type Stage = ConcreteStage
 }
 
+/** Factory for new [[TrenitaliaAPI]] instances */
 object TrenitaliaAPI {
-  import play.api.libs.json.Json
+  import com.google.common.net.UrlEscapers
+  import io.vertx.core.Future
+  import it.unibo.pcd.assignment2.eventdriven.FutureHelpers
+  import it.unibo.pcd.assignment2.eventdriven.controller.WebClient
+  import play.api.libs.json.{JsArray, Json, JsValue}
+  import it.unibo.pcd.assignment2.eventdriven.model.parsers.{SolutionsParser, StationCodeParser, StationInfoParser, StationNameParser, TrainInfoParser}
 
+  import java.time.LocalDateTime
+  import java.time.format.DateTimeFormatter
+  import scala.util.Try
+
+  /* The default implementation of the TrenitaliaAPI with a webclient for making requests. */
   private final class TrenitaliaAPIImpl(webClient: WebClient) extends TrenitaliaAPI {
-
+    /* Encodes a URL in a String with the escape codes used in URL fragments. */
     private def encode(url: String): String = UrlEscapers.urlFragmentEscaper.escape(url)
 
     override def getTrainSolutions(departureStation: StationName,
@@ -53,7 +58,7 @@ object TrenitaliaAPI {
       webClient.get(host, getSolutionsURI)
                .compose(r =>
                  Try(Json.parse(r))
-                   .map(s => FutureUtils.all(s.as[List[JsValue]]
+                   .map(s => FutureHelpers.all(s.as[List[JsValue]]
                                               .map(o => (o \ "idsolution").as[String])
                                               .map(i => webClient.get(host, s"$solutionsURI/$i/details"))))
                    .getOrElse(Future.failedFuture("Non è stata trovata alcuna soluzione"))
@@ -90,5 +95,10 @@ object TrenitaliaAPI {
                .compose(d => Future.succeededFuture(StationInfoParser(d)))
   }
 
+  /** Creates a new instance of the [[TrenitaliaAPI]] trait using the given [[WebClient]] for making HTTP requests.
+   *
+   *  @param webClient the [[WebClient]] used for the necessary HTTP requests.
+   *  @return a new instance of [[TrenitaliaAPI]]
+   */
   def apply(webClient: WebClient): TrenitaliaAPI = new TrenitaliaAPIImpl(webClient)
 }

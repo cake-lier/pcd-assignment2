@@ -43,9 +43,11 @@
                 </GridPane>
             </top>
             <center>
-                <Accordion maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
+                <Accordion expandedPane="$default" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                           BorderPane.alignment="CENTER">
                     <panes>
-                        <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Partenze">
+                        <TitledPane fx:id="default" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                                    text="Partenze">
                             <ScrollPane fx:id="departures" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
                                         fitToHeight="true" fitToWidth="true" />
                         </TitledPane>
