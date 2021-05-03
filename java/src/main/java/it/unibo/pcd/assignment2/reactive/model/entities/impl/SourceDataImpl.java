@@ -1,27 +1,14 @@
-package it.unibo.pcd.assignment2.executors.model.entities.impl;
+package it.unibo.pcd.assignment2.reactive.model.entities.impl;
 
-import it.unibo.pcd.assignment2.executors.model.entities.SourceData;
+import it.unibo.pcd.assignment2.reactive.model.entities.SourceData;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
-/**
- * An implementation of the {@link SourceData} interface.
- */
 public class SourceDataImpl implements SourceData {
     private final List<Path> pdfFiles;
     private final Set<String> stopwords;
 
-    /**
-     * Default constructor.
-     * @param pdfFiles all {@link Path}s of the files to process
-     * @param stopwords the set of words to used as stopwords
-     */
     public SourceDataImpl(final List<Path> pdfFiles, final Set<String> stopwords) {
         this.pdfFiles = new ArrayList<>(pdfFiles);
         this.stopwords = new HashSet<>(stopwords);

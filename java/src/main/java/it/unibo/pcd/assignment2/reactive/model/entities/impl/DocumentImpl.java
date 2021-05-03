@@ -1,6 +1,6 @@
-package it.unibo.pcd.assignment2.executors.model.entities.impl;
+package it.unibo.pcd.assignment2.reactive.model.entities.impl;
 
-import it.unibo.pcd.assignment2.executors.model.entities.Document;
+import it.unibo.pcd.assignment2.reactive.model.entities.Document;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.util.Objects;
@@ -19,11 +19,17 @@ public class DocumentImpl implements Document {
         this.internalDocument = Objects.requireNonNull(internalDocument);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PDDocument getInternalDocument() {
         return this.internalDocument;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -35,13 +41,19 @@ public class DocumentImpl implements Document {
         return this.internalDocument.equals(((DocumentImpl) o).internalDocument);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return Objects.hash(this.internalDocument);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
-        return "DocumentImpl{internalDocument=" + this.internalDocument + "}";
+        return "DocumentImpl{internalDocument=" + this.internalDocument + '}';
     }
 }

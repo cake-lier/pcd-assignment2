@@ -1,20 +1,14 @@
-package it.unibo.pcd.assignment2.executors.model.shared.impl;
+package it.unibo.pcd.assignment2.reactive.model.shared.impl;
 
-import it.unibo.pcd.assignment2.executors.model.shared.CompletedFlag;
+import it.unibo.pcd.assignment2.reactive.model.shared.CompletedFlag;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * An implementation of the {@link CompletedFlag} interface.
- */
 public class CompletedFlagImpl implements CompletedFlag {
     private final Lock lock;
     private boolean isClosed;
 
-    /**
-     * Default constructor.
-     */
     public CompletedFlagImpl() {
         this.lock = new ReentrantLock();
         this.isClosed = false;

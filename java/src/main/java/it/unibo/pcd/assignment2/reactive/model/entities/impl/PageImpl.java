@@ -1,5 +1,6 @@
-package it.unibo.pcd.assignment2.executors.model.entities.impl;
-import it.unibo.pcd.assignment2.executors.model.entities.Page;
+package it.unibo.pcd.assignment2.reactive.model.entities.impl;
+
+import it.unibo.pcd.assignment2.reactive.model.entities.Page;
 
 import java.util.Objects;
 
@@ -17,11 +18,17 @@ public class PageImpl implements Page {
         this.text = Objects.requireNonNull(text);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getText() {
         return this.text;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -34,13 +41,19 @@ public class PageImpl implements Page {
         return this.text.equals(page.getText());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return Objects.hash(this.text);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
-        return "PageImpl{text=" + this.text + "}";
+        return "PageImpl{text=" + this.text + '}';
     }
 }

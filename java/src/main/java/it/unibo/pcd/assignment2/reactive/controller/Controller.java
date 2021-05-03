@@ -1,4 +1,4 @@
-package it.unibo.pcd.assignment2.executors.controller;
+package it.unibo.pcd.assignment2.reactive.controller;
 
 import java.nio.file.Path;
 
@@ -14,7 +14,7 @@ public interface Controller {
      * @param stopwordsFile the path of the file containing the stopwords
      * @param wordsNumber the number of most frequent words to display
      */
-    void launch(Path filesDirectory, Path stopwordsFile, int wordsNumber);
+    void launch(Path filesDirectory, Path stopwordsFile, final int wordsNumber);
 
     /**
      * It notifies the Model to suspend the currently running computation.

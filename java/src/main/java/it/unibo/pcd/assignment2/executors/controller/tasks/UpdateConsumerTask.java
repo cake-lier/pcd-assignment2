@@ -10,8 +10,8 @@ import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
- * A task for collecting the results of the computation, the
- * {@link Update}s, and publish them to the View component.
+ * A task for collecting the results of the word counting process, the {@link Update}s, and publish them on the {@link View}
+ * component.
  */
 public class UpdateConsumerTask implements Runnable {
     private final ScheduledExecutorService executor;
@@ -23,6 +23,7 @@ public class UpdateConsumerTask implements Runnable {
      * Default constructor.
      * @param executor the executor used to execute this task
      * @param wordCounter the pipe from which getting the {@link Update}s
+     * @param completedFlag the flag to be checked for completion of the word counting process
      * @param view the View component this task should publish its {@link Update}s onto
      */
     public UpdateConsumerTask(final ScheduledExecutorService executor,

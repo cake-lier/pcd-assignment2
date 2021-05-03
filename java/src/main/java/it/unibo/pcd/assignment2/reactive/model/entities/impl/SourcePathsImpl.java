@@ -1,22 +1,14 @@
-package it.unibo.pcd.assignment2.executors.model.entities.impl;
+package it.unibo.pcd.assignment2.reactive.model.entities.impl;
 
-import it.unibo.pcd.assignment2.executors.model.entities.SourcePaths;
+import it.unibo.pcd.assignment2.reactive.model.entities.SourcePaths;
 
 import java.nio.file.Path;
 import java.util.Objects;
 
-/**
- * An implementation of the {@link SourcePaths} interface.
- */
 public class SourcePathsImpl implements SourcePaths {
     private final Path filesDirectory;
     private final Path stopwordsFile;
 
-    /**
-     * Default constructor.
-     * @param filesDirectory the {@link Path} representing the folder in which the files to process are contained
-     * @param stopwordsFile the {@link Path} representing the file which contains the stopwords
-     */
     public SourcePathsImpl(final Path filesDirectory, final Path stopwordsFile) {
         this.filesDirectory = Objects.requireNonNull(filesDirectory);
         this.stopwordsFile = Objects.requireNonNull(stopwordsFile);
