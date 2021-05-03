@@ -67,12 +67,13 @@ object StationTab {
     })
 
     override def displayStationInfo(stationInfo: StationInfo): Unit = {
-      val arrivalsContainer = new VBox(5)
+      val spacing = 5
+      val arrivalsContainer = new VBox(spacing)
       arrivals.setContent(arrivalsContainer)
       discard {
         arrivalsContainer.children ++= stationInfo.arrivals.map(r => TrainBoardCard(r, TrainBoardCard.Type.Arrival))
       }
-      val departuresContainer = new VBox(5)
+      val departuresContainer = new VBox(spacing)
       departures.setContent(departuresContainer)
       discard {
         departuresContainer.children ++= stationInfo.departures.map(r => TrainBoardCard(r, TrainBoardCard.Type.Departure))

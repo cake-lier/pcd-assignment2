@@ -37,8 +37,8 @@ object WebClient {
 
   /* Leverages a Vertx VertxWebClient for making HTTP(S) requests. */
   private final case class WebClientImpl(vertx: Vertx) extends WebClient {
-    val webClient: WebClientSession = WebClientSession.create(VertxWebClient.create(vertx))
-    val httpsPort = 443
+    private val webClient: WebClientSession = WebClientSession.create(VertxWebClient.create(vertx))
+    private val httpsPort = 443
 
     /* Maps an HTTP response with a Buffer body to the body itself condensed into a String */
     private def fromResponseToBody(req: Future[HttpResponse[Buffer]]): Future[String] =

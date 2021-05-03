@@ -1,6 +1,6 @@
 package it.unibo.pcd.assignment2.eventdriven.model
 
-import it.unibo.pcd.assignment2.eventdriven.model.{Route => ConcreteRoute, Solution => ConcreteSolution, Stage => ConcreteStage, Station => ConcreteStation, StationInfo => ConcreteStationInfo, Stop => ConcreteStop, TimestampedStation => ConcreteTimestampedStation, Train => ConcreteTrain, TrainBoardRecord => ConcreteTrainBoardRecord, TrainInfo => ConcreteTrainInfo, TrainType => ConcreteTrainType, Transport => ConcreteTransport, TravelState => ConcreteTravelState}
+import it.unibo.pcd.assignment2.eventdriven.model.{Solution => ConcreteSolution, Stage => ConcreteStage, Station => ConcreteStation, StationInfo => ConcreteStationInfo, Stop => ConcreteStop, TimestampedStation => ConcreteTimestampedStation, Train => ConcreteTrain, TrainBoardRecord => ConcreteTrainBoardRecord, TrainInfo => ConcreteTrainInfo, TrainType => ConcreteTrainType, Transport => ConcreteTransport, TravelState => ConcreteTravelState}
 
 /** A [[TrainsAPI]] for Trenitalia trains.
  *
@@ -18,7 +18,6 @@ sealed trait TrenitaliaAPI extends TrainsAPI {
   override type Solution = ConcreteSolution
   override type TravelState = ConcreteTravelState
   override type Stop = ConcreteStop
-  override type Route = ConcreteRoute
   override type TrainInfo = ConcreteTrainInfo
   override type TrainBoardRecord = ConcreteTrainBoardRecord
   override type StationInfo = ConcreteStationInfo
@@ -48,20 +47,22 @@ object TrenitaliaAPI {
                                    datetimeDeparture: LocalDateTime): Future[List[Solution]] = {
       val host = "www.lefrecce.it"
       val solutionsURI = "/msite/api/solutions"
-      val getSolutionsURI = solutionsURI +
-                            "?" +
-                            s"origin=${encode(departureStation)}" +
-                            s"&destination=${encode(arrivalStation)}" +
-                            s"&adate=${datetimeDeparture.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}" +
-                            s"&atime=${datetimeDeparture.getHour.toString}" +
-                            "&arflag=A&adultno=1&childno=0&direction=A&frecce=false&onlyRegional=false"
-      webClient.get(host, getSolutionsURI)
+      val solutionsPath = solutionsURI +
+                          "?" +
+                          s"origin=${encode(departureStation)}" +
+                          s"&destination=${encode(arrivalStation)}" +
+                          s"&adate=${datetimeDeparture.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}" +
+                          s"&atime=${datetimeDeparture.getHour.toString}" +
+                          "&arflag=A&adultno=1&childno=0&direction=A&frecce=false&onlyRegional=false"
+      val solutionIdKey = "idsolution"
+      val noSolutionsMessage = "Non è stata trovata alcuna soluzione"
+      webClient.get(host, solutionsPath)
                .compose(r =>
                  Try(Json.parse(r))
                    .map(s => FutureHelpers.all(s.as[List[JsValue]]
-                                              .map(o => (o \ "idsolution").as[String])
+                                              .map(o => (o \ solutionIdKey).as[String])
                                               .map(i => webClient.get(host, s"$solutionsURI/$i/details"))))
-                   .getOrElse(Future.failedFuture("Non è stata trovata alcuna soluzione"))
+                   .getOrElse(Future.failedFuture(noSolutionsMessage))
                    .compose(l => Future.succeededFuture(SolutionsParser(r, l))))
     }
 
@@ -69,6 +70,7 @@ object TrenitaliaAPI {
     private val viaggiatrenoAPI = "/viaggiatrenonew/resteasy/viaggiatreno/"
 
     override def getTrainInfo(trainCode: TrainCode): Future[TrainInfo] = {
+      val noTrainFoundMessage = "Il codice treno non è stato trovato"
       webClient.get(viaggiatrenoHost,s"${viaggiatrenoAPI}cercaNumeroTreno/$trainCode")
                .compose(r =>
                  Option(r)
@@ -77,22 +79,26 @@ object TrenitaliaAPI {
                      s"${viaggiatrenoAPI}andamentoTreno/${StationCodeParser(c)}/$trainCode/" +
                      s"${System.currentTimeMillis().toString}"
                    ))
-                   .getOrElse(Future.failedFuture("Il codice treno non è stato trovato")))
+                   .getOrElse(Future.failedFuture(noTrainFoundMessage)))
                .compose(r => Future.succeededFuture(TrainInfoParser(r)))
     }
 
-    override def getStationInfo(stationName: StationName): Future[StationInfo] =
-      webClient.get(viaggiatrenoHost,s"${viaggiatrenoAPI}cercaStazione/${encode(stationName)}")
+    override def getStationInfo(stationName: StationName): Future[StationInfo] = {
+      val stationPath = s"/vt_pax_internet/mobile/stazione"
+      val stationCodeFormFieldName = "codiceStazione"
+      val noStationFoundMessage = "La stazione non è stata trovata"
+      webClient.get(viaggiatrenoHost, s"${viaggiatrenoAPI}cercaStazione/${encode(stationName)}")
                .compose(r =>
                  Option(r)
                    .filter(s => Json.parse(s).as[JsArray].value.nonEmpty)
                    .map(s => webClient.post(
                      viaggiatrenoHost,
-                     s"/vt_pax_internet/mobile/stazione",
-                     Map("codiceStazione" -> StationNameParser(s))
+                     stationPath,
+                     Map(stationCodeFormFieldName -> StationNameParser(s))
                    ))
-                   .getOrElse(Future.failedFuture("La stazione non è stata trovata")))
+                   .getOrElse(Future.failedFuture(noStationFoundMessage)))
                .compose(d => Future.succeededFuture(StationInfoParser(d)))
+    }
   }
 
   /** Creates a new instance of the [[TrenitaliaAPI]] trait using the given [[WebClient]] for making HTTP requests.

@@ -79,6 +79,7 @@ object Controller {
   private final class ControllerImpl(view: View) extends AbstractVerticle with Controller {
     private var model: Option[TrenitaliaAPI] = None
     private var updates: Map[String, Long] = Map[String, Long]()
+    private val delayBetweenRequests = 30_000
 
     discard { Vertx.vertx().deployVerticle(this) }
 
@@ -103,7 +104,7 @@ object Controller {
           producer(updateKey)
             .onSuccess(consumer)
             .onSuccess(_ => updates += updateKey -> getVertx.setPeriodic(
-              30_000,
+              delayBetweenRequests,
               _ => discard { producer(updateKey).onSuccess(consumer).onFailure(e => view.displayErrorMessage(e.getMessage)) }
             ))
             .onFailure(e => view.displayErrorMessage(e.getMessage))

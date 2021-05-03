@@ -52,7 +52,7 @@ object TrainTab {
 
     override val inner: Tab = loader.load[Tab]
 
-    stations.setPadding(Insets(0, 5.0, 0, 5.0))
+    stations.setPadding(Insets(top = 0, right = 5.0, bottom = 0, left = 5.0))
     startMonitorTrain.setOnMouseClicked(_ => {
       startMonitorTrain.setDisable(true)
       stations.setContent(LoadingLabel().inner)
@@ -67,9 +67,9 @@ object TrainTab {
     })
 
     override def displayTrainInfo(trainInfo: TrainInfo): Unit = {
-      val container = new VBox(5)
-      container.padding = Insets(0, 0, 5.0, 0)
-      setLabelForText(s"${trainInfo.route.trainType.toString} ${trainInfo.route.trainCode.getOrElse("")}", container)
+      val container = new VBox(spacing = 5)
+      container.padding = Insets(top = 0, right = 0, bottom = 5.0, left = 0)
+      setLabelForText(s"${trainInfo.train.trainType.toString} ${trainInfo.train.trainCode.getOrElse("")}", container)
       setLabelForText(getTextForState(trainInfo.stops), container)
       discard { container.children ++= trainInfo.stops.map(StopCard(_)) }
       stations.setContent(container)
@@ -86,7 +86,7 @@ object TrainTab {
       val label = new Label(text)
       label.maxWidth = Double.MaxValue
       label.maxHeight = Double.MaxValue
-      label.margin = Insets(5.0, 0, 0, 0)
+      label.margin = Insets(top = 5.0, right = 0, bottom = 0, left = 0)
       label.styleClass = List("gridCell")
       label.applyCss()
       discard { container.children += label }
@@ -100,6 +100,7 @@ object TrainTab {
         "Il treno è già arrivato"
       }
       else {
+        val notAvailableMessage = "--"
         stations.map(s => (s.departureState, s.arrivalState))
                 .findLast(p => p._1 =/= Nothing || p._2 =/= Nothing)
                 .map(p => Some(p._2).filter(_ =/= Nothing).getOrElse(p._1))
@@ -107,9 +108,9 @@ object TrainTab {
                   case InTime => "Il treno è in orario"
                   case Delayed(m) => s"Il treno è in ritardo di ${m.toString} minuti"
                   case Early(m) => s"Il treno è in anticipo di ${m.toString} minuti"
-                  case _ => "--"
+                  case _ => notAvailableMessage
                 })
-                .getOrElse("--")
+                .getOrElse(notAvailableMessage)
       }
     }
   }

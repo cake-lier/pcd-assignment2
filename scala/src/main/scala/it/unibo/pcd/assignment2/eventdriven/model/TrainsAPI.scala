@@ -38,20 +38,20 @@ trait TrainsAPI {
     def trainType: TrainType
   }
 
-  /** A [[Train]] which departs from a [[Station]] at a given datetime and arrives to a [[Station]] at another datetime.
+  /** A mean of transportation as included in a [[Solution]] to reach a destination [[Station]] from an origin [[Station]].
    *
-   *  In this case, the notion of [[Train]] should be extended to encompass the [[Route]] the [[Train]] does.
+   *  A [[Transport]] entity is a specialization of a [[Train]], now provided with a context, the [[Solution]] that uses it for
+   *  spanning between an origin and a destination. The departure and arrival [[Station]] are the ones at which the customer
+   *  has to take or leave the [[Train]] for following the travel suggested by the [[Solution]], not the real terminal ones of the
+   *  [[Train]].
    */
-  type Route <: Train {
-    /** Returns the [[TimestampedStation]] from which this [[Route]] starts. */
+  type Transport <: Train {
+    /** Returns the [[TimestampedStation]] from which this [[Train]] departs. */
     def departureStation: TimestampedStation
 
-    /** Returns the [[TimestampedStation]] at which this [[Route]] ends. */
+    /** Returns the [[TimestampedStation]] at which this [[Train]] arrives. */
     def arrivalStation: TimestampedStation
-  }
 
-  /** Factory for new [[Route]] instances. */
-  type Transport <: Route {
     /** Returns the [[Stage]]s that this [[Transport]] go through for getting from the departure [[Station]] to the arrival
      *  [[Station]].
      */
@@ -152,14 +152,13 @@ trait TrainsAPI {
 
   /** A real-time information about a [[Train]].
    *
-   *  A travelling [[Train]] follows a given [[Route]], which is identified by its first and last [[Station]] and all [[Stop]]s
-   *  in between. The [[Stop]]s contains also the first and last [[Station]] which are previously mentioned.
+   *  A travelling [[Train]] follows a given route, which is identified by all [[Stop]]s in between the first and the last one.
    */
   type TrainInfo <: {
-    /** Returns the [[Route]] for which getting the [[TrainInfo]]. */
-    def route: Route
+    /** Returns the [[Train]] for which getting the [[TrainInfo]]. */
+    def train: Train
 
-    /** Returns the [[Stop]]s which make the [[Route]] this [[TrainInfo]] is about. */
+    /** Returns the [[Stop]]s which are made by the [[Train]] this [[TrainInfo]] is about. */
     def stops: List[Stop]
   }
 

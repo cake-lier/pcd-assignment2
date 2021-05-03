@@ -28,51 +28,21 @@ object Train {
   def apply(trainCode: Option[String], trainType: TrainType): Train = TrainImpl(trainCode, trainType)
 }
 
-/** A [[Train]] which departs from a [[Station]] at a given datetime and arrives to a [[Station]] at another datetime.
- *
- *  In this case, the notion of [[Train]] should be extended to encompass the [[Route]] the [[Train]] does.
- *  The instantiation is made through its companion object.
- */
-sealed trait Route extends Train {
-  /** Returns the [[TimestampedStation]] from which this [[Route]] starts. */
-  def departureStation: TimestampedStation
-
-  /** Returns the [[TimestampedStation]] at which this [[Route]] ends. */
-  def arrivalStation: TimestampedStation
-}
-
-/** Factory for new [[Route]] instances. */
-object Route {
-  /* The default Route implementation with a case class. */
-  private final case class RouteImpl(trainCode: Option[String],
-                                     trainType: TrainType,
-                                     departureStation: TimestampedStation,
-                                     arrivalStation: TimestampedStation) extends Route
-
-  /** Creates a new instance of the [[Route]] trait.
-   *
-   *  @param trainCode the code of this [[Train]]
-   *  @param trainType the type of this [[Train]]
-   *  @param departureStation the [[TimestampedStation]] from which this [[Train]] departs
-   *  @param arrivalStation the [[TimestampedStation]] at which this [[Train]] arrives
-   *  @return a new [[Route]] instance
-   */
-  def apply(trainCode: Option[String],
-            trainType: TrainType,
-            departureStation: TimestampedStation,
-            arrivalStation: TimestampedStation): Route =
-    RouteImpl(trainCode, trainType, departureStation, arrivalStation)
-}
-
 /** A mean of transportation as included in a [[Solution]] to reach a destination [[Station]] from an origin [[Station]].
  *
- *  A [[Transport]] entity is a specialization of a [[Route]], now provided with a context, the [[Solution]] that uses it for
- *  spanning between an origin and a destination. The departure and arrival [[Station]] here assume a different meaning: those
- *  are the ones at which the customer has to take or leave the [[Train]] for following the travel suggested by the
- *  [[Solution]], not the real terminal ones of the [[Train]].
+ *  A [[Transport]] entity is a specialization of a [[Train]], now provided with a context, the [[Solution]] that uses it for
+ *  spanning between an origin and a destination. The departure and arrival [[Station]] are the ones at which the customer has to
+ *  take or leave the [[Train]] for following the travel suggested by the [[Solution]], not the real terminal ones of the
+ *  [[Train]].
  *  The instantiation is made through its companion object.
  */
-sealed trait Transport extends Route {
+sealed trait Transport extends Train {
+  /** Returns the [[TimestampedStation]] from which this [[Transport]] starts. */
+  def departureStation: TimestampedStation
+
+  /** Returns the [[TimestampedStation]] at which this [[Transport]] ends. */
+  def arrivalStation: TimestampedStation
+
   /** Returns the [[Stage]]s that this [[Transport]] go through for getting from the departure [[Station]] to the arrival
    *  [[Station]].
    */

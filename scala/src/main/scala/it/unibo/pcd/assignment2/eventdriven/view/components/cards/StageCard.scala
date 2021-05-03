@@ -25,9 +25,12 @@ object StageCard {
     override val inner: Pane = loader.load[GridPane]
     stopTitle.setText(s"${index.toString}ª fermata: ${stage.stationName}")
     val dateTimePattern = "dd/MM/yyyy 'alle' HH:mm"
+    val notAvailableMessage = "--"
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(dateTimePattern)
-    stopArrival.setText(s"${stopArrival.getText}${stage.arrivalDatetime.map(_.format(formatter)).getOrElse("--")}")
-    stopDeparture.setText(s"${stopDeparture.getText}${stage.departureDatetime.map(_.format(formatter)).getOrElse("--")}")
+    stopArrival.setText(s"${stopArrival.getText}${stage.arrivalDatetime.map(_.format(formatter)).getOrElse(notAvailableMessage)}")
+    stopDeparture.setText(s"${stopDeparture.getText}${stage.departureDatetime
+                                                           .map(_.format(formatter))
+                                                           .getOrElse(notAvailableMessage)}")
   }
 
   /** Creates a new [[Component]] for displaying the information of a [[Stage]].

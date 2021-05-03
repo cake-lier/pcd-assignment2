@@ -10,5 +10,8 @@ object StationCodeParser {
    *  @param json the JSON-formatted string to parse
    *  @return the extracted [[it.unibo.pcd.assignment2.eventdriven.model.Station]] code
    */
-  def apply(json: String): String = (Json.parse(json).as[JsValue] \ "codLocOrig").as[String]
+  def apply(json: String): String = {
+    val stationCodeKey = "codLocOrig"
+    (Json.parse(json).as[JsValue] \ stationCodeKey).as[String]
+  }
 }

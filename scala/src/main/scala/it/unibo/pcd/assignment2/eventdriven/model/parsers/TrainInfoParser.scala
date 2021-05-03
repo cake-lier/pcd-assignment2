@@ -24,10 +24,6 @@ object TrainInfoParser {
   private def extractDatetime(json: JsValue, key: String): Option[LocalDateTime] =
     (json \ key).asOpt[Long].map(millisToLocalDateTime)
 
-  /* Extracts a TimestampedStation from a JSON. */
-  private def extractTimestampedStation(json: JsValue, nameKey: String, timestampKey: String): TimestampedStation =
-    TimestampedStation(WordUtils.capitalizeFully((json \ nameKey).as[String]), (json \ timestampKey).as[Long])
-
   /** Parses a JSON-formatted [[String]] into a [[TrainInfo]].
    *
    *  This method is built upon the Trenitalia JSON responses, so the format of the inputted JSONs should respect the format of
@@ -37,33 +33,35 @@ object TrainInfoParser {
    */
   def apply(json: String): TrainInfo = {
     val parsed = Json.parse(json)
+    val trainCodeKey = "numeroTreno"
+    val trainTypeKey = "categoria"
+    val stopsKey = "fermate"
     TrainInfo(
-      Route(
-        (parsed \ "numeroTreno").asOpt[Int].map(_.toString),
-        TrainType.values.find(_.code === (parsed \ "categoria").as[String]).getOrElse(TrainType.Autobus),
-        extractTimestampedStation(parsed, "origine", "orarioPartenza"),
-        extractTimestampedStation(parsed, "destinazione", "orarioArrivo")
-      ),
-      (parsed \ "fermate").as[List[JsValue]]
-                          .map(o => {
-                            val actualDeparture = extractDatetime(o, "partenzaReale")
-                            val actualArrival = extractDatetime(o, "arrivoReale")
-                            Stop(
-                              WordUtils.capitalizeFully((o \ "stazione").as[String]),
-                              extractDatetime(o, "partenza_teorica"),
-                              actualDeparture,
-                              extractDatetime(o, "arrivo_teorico"),
-                              actualArrival,
-                              (o \ "binarioProgrammatoPartenzaDescrizione")
-                                  .asOpt[String]
-                                  .orElse((o \ "binarioProgrammatoArrivoDescrizione").asOpt[String]),
-                              (o \ "binarioEffettivoPartenzaDescrizione")
-                                  .asOpt[String]
-                                  .orElse((o \ "binarioEffettivoArrivoDescrizione").asOpt[String]),
-                              calculateTravelState(actualDeparture, (o \ "ritardoPartenza").as[Int]),
-                              calculateTravelState(actualArrival, (o \ "ritardoArrivo").as[Int])
-                            )
-                          })
+      Train((parsed \ trainCodeKey).asOpt[Int].map(_.toString),
+            TrainType.values.find(_.code === (parsed \ trainTypeKey).as[String]).getOrElse(TrainType.Autobus)),
+      (parsed \ stopsKey).as[List[JsValue]]
+                         .map(o => {
+                           val actualDeparture = extractDatetime(o, key = "partenzaReale")
+                           val actualArrival = extractDatetime(o, key = "arrivoReale")
+                           val stationNameKey = "stazione"
+                           val plannedPlatformNameKey = "binarioProgrammatoPartenzaDescrizione"
+                           val altPlannedPlatformNameKey = "binarioProgrammatoArrivoDescrizione"
+                           val actualPlatformNameKey = "binarioEffettivoPartenzaDescrizione"
+                           val altActualPlatformNameKey = "binarioEffettivoArrivoDescrizione"
+                           val delayDepartureKey = "ritardoPartenza"
+                           val delayArrivalKey = "ritardoArrivo"
+                           Stop(
+                             WordUtils.capitalizeFully((o \ stationNameKey).as[String]),
+                             extractDatetime(o, key = "partenza_teorica"),
+                             actualDeparture,
+                             extractDatetime(o, key = "arrivo_teorico"),
+                             actualArrival,
+                             (o \ plannedPlatformNameKey).asOpt[String].orElse((o \ altPlannedPlatformNameKey).asOpt[String]),
+                             (o \ actualPlatformNameKey).asOpt[String].orElse((o \ altActualPlatformNameKey).asOpt[String]),
+                             calculateTravelState(actualDeparture, (o \ delayDepartureKey).as[Int]),
+                             calculateTravelState(actualArrival, (o \ delayArrivalKey).as[Int])
+                           )
+                         })
     )
   }
 }

@@ -30,27 +30,27 @@ object StopCard {
     stopTitle.setText(stop.stationName)
     val datetimePattern = "dd/MM/yyyy 'alle' HH:mm"
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(datetimePattern)
-    val noInfoAvailableMessage = "--"
+    val notAvailableMessage = "--"
     departureInfo.setText(
       stop.plannedDepartureDatetime
           .map(p => s"Partenza programmata: ${p.format(formatter)}    " +
                     s"${stop.actualDepartureDatetime.map(a => s"Partenza effettiva: ${a.format(formatter)} ").getOrElse("")}")
-          .getOrElse(noInfoAvailableMessage)
+          .getOrElse(notAvailableMessage)
     )
     arrivalInfo.setText(
       stop.plannedArrivalDatetime
           .map(p => s"Arrivo programmato: ${p.format(formatter)}    " +
                     s"${stop.actualArrivalDatetime.map(a => s"Arrivo effettivo: ${a.format(formatter)}").getOrElse("")}")
-          .getOrElse(noInfoAvailableMessage)
+          .getOrElse(notAvailableMessage)
     )
-    platformInfo.setText(s"Binario programmato: ${stop.plannedPlatform.getOrElse(noInfoAvailableMessage)}    " +
-                         s"Binario effettivo: ${stop.actualPlatform.getOrElse(noInfoAvailableMessage)}")
+    platformInfo.setText(s"Binario programmato: ${stop.plannedPlatform.getOrElse(notAvailableMessage)}    " +
+                         s"Binario effettivo: ${stop.actualPlatform.getOrElse(notAvailableMessage)}")
     stateInfo.setText((stop.arrivalState, stop.departureState) match {
       case (a, d) if a =/= Nothing && d =/= Nothing => s"Il treno è arrivato ${getTextFromState(a)} ed è partito " +
                                                        s"${getTextFromState(d)}"
       case (a, _) if a =/= Nothing => s"Il treno è arrivato ${getTextFromState(a)} e non è partito"
       case (a, d) if a === Nothing && d =/= Nothing => s"Il treno è partito ${getTextFromState(d)}"
-      case _ => noInfoAvailableMessage
+      case _ => notAvailableMessage
     })
 
     /* Returns the text to display for the given TravelState. */

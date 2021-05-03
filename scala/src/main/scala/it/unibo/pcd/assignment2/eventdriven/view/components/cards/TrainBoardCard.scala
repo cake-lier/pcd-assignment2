@@ -52,14 +52,15 @@ object TrainBoardCard {
                             s"delle ore ${trainBoardRecord.time.format(formatter)} " +
                             cardType.message +
                             s" ${trainBoardRecord.station.stationName}")
+    val notAvailableMessage = "--"
     trainBoardDelay.setText(trainBoardRecord.state.state match {
       case Delayed => s"In ritardo di ${trainBoardRecord.state.delay.getOrElse(0).toString} minuti"
       case Early => s"In anticipo di ${(-trainBoardRecord.state.delay.getOrElse(0)).toString} minuti"
       case InTime => "In orario"
-      case _ => "--"
+      case _ => notAvailableMessage
     })
-    trainBoardPlannedPlatform.setText(s"Binario programmato: ${trainBoardRecord.expectedPlatform.getOrElse("--")}")
-    trainBoardExpectedPlatform.setText(s"Binario effettivo: ${trainBoardRecord.actualPlatform.getOrElse("--")}")
+    trainBoardPlannedPlatform.setText(s"Binario programmato: ${trainBoardRecord.expectedPlatform.getOrElse(notAvailableMessage)}")
+    trainBoardExpectedPlatform.setText(s"Binario effettivo: ${trainBoardRecord.actualPlatform.getOrElse(notAvailableMessage)}")
   }
 
   /** Creates a new instance of a [[Component]] for displaying a [[TrainBoardRecord]].
