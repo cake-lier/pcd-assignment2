@@ -9,14 +9,14 @@ import java.util.function.Consumer;
 /**
  * The task to be used for enqueueing new {@link Update}s into the {@link WordCounter}.
  */
-public class WordEnqueueingTask implements Consumer<Update> {
+public class WordEnqueueerTask implements Consumer<Update> {
     private final WordCounter wordCounter;
 
     /**
      * Default constructor.
      * @param wordCounter the {@link WordCounter} to be filled by the incoming {@link Update}s
      */
-    public WordEnqueueingTask(final WordCounter wordCounter) {
+    public WordEnqueueerTask(final WordCounter wordCounter) {
         this.wordCounter = Objects.requireNonNull(wordCounter);
     }
 

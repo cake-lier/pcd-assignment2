@@ -13,8 +13,8 @@ import it.unibo.pcd.assignment2.executors.model.shared.impl.SuspendedFlagImpl;
 import it.unibo.pcd.assignment2.executors.model.tasks.DocumentLoaderTask;
 import it.unibo.pcd.assignment2.executors.model.tasks.DocumentSplitterTask;
 import it.unibo.pcd.assignment2.executors.model.tasks.PathLoaderTask;
-import it.unibo.pcd.assignment2.executors.model.tasks.WordCountingTask;
-import it.unibo.pcd.assignment2.executors.model.tasks.WordEnqueueingTask;
+import it.unibo.pcd.assignment2.executors.model.tasks.WordCounterTask;
+import it.unibo.pcd.assignment2.executors.model.tasks.WordEnqueueerTask;
 import it.unibo.pcd.assignment2.executors.view.View;
 
 import java.nio.file.Path;
@@ -68,8 +68,8 @@ public class ControllerImpl implements Controller {
                                  pgs.stream()
                                     .map(pg -> CompletableFuture
                                         .completedFuture(pg)
-                                        .thenApplyAsync(new WordCountingTask(d.getStopwords()), this.executor)
-                                        .thenAcceptAsync(new WordEnqueueingTask(wordCounter), this.executor))
+                                        .thenApplyAsync(new WordCounterTask(d.getStopwords()), this.executor)
+                                        .thenAcceptAsync(new WordEnqueueerTask(wordCounter), this.executor))
                                     .toArray(CompletableFuture[]::new)),
                              this.executor
                          ))

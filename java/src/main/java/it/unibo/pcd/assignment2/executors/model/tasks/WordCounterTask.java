@@ -14,14 +14,14 @@ import java.util.stream.Collectors;
 /**
  * The task for counting the words in a {@link Page} and collecting them in an {@link Update}.
  */
-public class WordCountingTask implements Function<Page, Update> {
+public class WordCounterTask implements Function<Page, Update> {
     private final Set<String> stopwords;
 
     /**
      * Default constructor.
      * @param stopwords the set of words to be ignored during the counting process but which are counted as processed words anyway
      */
-    public WordCountingTask(final Set<String> stopwords) {
+    public WordCounterTask(final Set<String> stopwords) {
         this.stopwords = Objects.requireNonNull(stopwords);
     }
 
