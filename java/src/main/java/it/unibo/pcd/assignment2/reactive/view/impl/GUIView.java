@@ -10,7 +10,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -19,7 +23,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -82,9 +85,6 @@ public class GUIView implements View {
         this.show();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void displayProgress(final Map<String, Long> frequencies, final long processedWords) {
         Platform.runLater(() -> {
@@ -101,9 +101,6 @@ public class GUIView implements View {
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void displayCompletion() {
         Platform.runLater(() -> {
@@ -112,9 +109,6 @@ public class GUIView implements View {
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void displayError(final String message) {
         Platform.runLater(() -> new Alert(Alert.AlertType.ERROR, message, ButtonType.OK).showAndWait());
@@ -124,8 +118,8 @@ public class GUIView implements View {
      * It completes the GUI initialization and it shows the view to the user.
      */
     private void show() {
-        this.filesDirectoryPath = Optional.of(Paths.get("C:\\Users\\Lorenzo\\pdfs"));//Optional.empty();
-        this.stopwordsFilePath = Optional.of(Paths.get("C:\\Users\\Lorenzo\\stopwords.txt"));//Optional.empty();
+        this.filesDirectoryPath = Optional.empty();
+        this.stopwordsFilePath = Optional.empty();
         try {
             final FXMLLoader loader = new FXMLLoader(ClassLoader.getSystemResource(FXML_FILENAME));
             loader.setController(this);

@@ -23,25 +23,16 @@ public class UpdateImpl implements Update {
         this.processedWords = processedWords;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Map<String, Long> getFrequencies() {
         return this.frequencies;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long getProcessedWords() {
         return this.processedWords;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -54,19 +45,13 @@ public class UpdateImpl implements Update {
         return this.processedWords == update.processedWords && this.frequencies.equals(update.frequencies);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         return Objects.hash(this.frequencies, this.processedWords);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
-        return "UpdateImpl{frequencies=" + this.frequencies + ", processedWords=" + this.processedWords + '}';
+        return "UpdateImpl{frequencies=" + this.frequencies + ", processedWords=" + this.processedWords + "}";
     }
 }

@@ -1,45 +1,42 @@
 package it.unibo.pcd.assignment2.reactive.controller.impl;
 
-import io.reactivex.rxjava3.core.Observable;
+import hu.akarnokd.rxjava3.operators.FlowableTransformers;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.processors.PublishProcessor;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import it.unibo.pcd.assignment2.reactive.controller.Controller;
-import it.unibo.pcd.assignment2.reactive.controller.executor.PausableExecutor;
-import it.unibo.pcd.assignment2.reactive.controller.executor.PausableExecutors;
-import it.unibo.pcd.assignment2.reactive.controller.executor.SuspendableForkJoinPool;
 import it.unibo.pcd.assignment2.reactive.controller.tasks.ComputationEndTask;
 import it.unibo.pcd.assignment2.reactive.controller.tasks.UpdateConsumerTask;
-import it.unibo.pcd.assignment2.reactive.model.entities.impl.SourcePathsImpl;
-import it.unibo.pcd.assignment2.reactive.model.pipes.WordCounter;
-import it.unibo.pcd.assignment2.reactive.model.pipes.impl.WordCounterImpl;
-import it.unibo.pcd.assignment2.reactive.model.shared.SuspendedFlag;
-import it.unibo.pcd.assignment2.reactive.model.shared.impl.SuspendedFlagImpl;
 import it.unibo.pcd.assignment2.reactive.model.tasks.DocumentLoaderTask;
 import it.unibo.pcd.assignment2.reactive.model.tasks.DocumentSplitterTask;
 import it.unibo.pcd.assignment2.reactive.model.tasks.PathLoaderTask;
-import it.unibo.pcd.assignment2.reactive.model.tasks.WordCountingTask;
-import it.unibo.pcd.assignment2.reactive.model.tasks.WordEnqueueingTask;
+import it.unibo.pcd.assignment2.reactive.model.tasks.UpdateProjectorTask;
+import it.unibo.pcd.assignment2.reactive.model.tasks.WordCounterTask;
+import it.unibo.pcd.assignment2.reactive.model.tasks.WordAggregatorTask;
 import it.unibo.pcd.assignment2.reactive.view.View;
-import it.unibo.pcd.assignment2.reactive.model.tasks.*;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * An implementation of the {@link Controller} interface.
  */
 public class ControllerImpl implements Controller {
-    private static final int TOTAL_THREADS = Math.round(Runtime.getRuntime().availableProcessors() * 1.0f * (1 + 1.093f));
     private static final int MILLIS_BETWEEN_FRAMES = Math.round(1000.0f / 60.0f);
 
-    private final List<PausableExecutor> executorList;
     private final View view;
-    private final PausableExecutor ioExecutor;
-    private final PausableExecutor computationExecutor;
-    PublishProcessor<Boolean> valve = PublishProcessor.create();
-    SuspendedFlag flag = new SuspendedFlagImpl();
-    SuspendableForkJoinPool executor = new SuspendableForkJoinPool(TOTAL_THREADS,flag);
+    private final Map<Class<?>, PublishProcessor<Boolean>> valves;
+    private Optional<Disposable> currentFlowable;
 
 
     /**
@@ -47,53 +44,71 @@ public class ControllerImpl implements Controller {
      * @param view the View component to be notified by this Controller instance
      */
     public ControllerImpl(final View view) {
-        this.ioExecutor = PausableExecutors.cachedThreadPool(TOTAL_THREADS);
-        this.computationExecutor = PausableExecutors.fixedThreadPool(TOTAL_THREADS);
-        this.executorList = Arrays.asList(this.ioExecutor, this.computationExecutor);
         this.view = Objects.requireNonNull(view);
+        this.currentFlowable = Optional.empty();
+        this.valves = Stream.of(PathLoaderTask.class,
+                                DocumentLoaderTask.class,
+                                DocumentSplitterTask.class,
+                                WordCounterTask.class,
+                                WordAggregatorTask.class,
+                                UpdateProjectorTask.class)
+                            .collect(Collectors.toMap(Function.identity(), v -> PublishProcessor.create()));
     }
 
     @Override
     public void launch(final Path filesDirectory, final Path stopwordsFile, final int wordsNumber) {
-        final WordCounter wordCounter = new WordCounterImpl(wordsNumber);
-
-
-        Observable.just(new SourcePathsImpl(filesDirectory,stopwordsFile))
-                .observeOn(Schedulers.from(this.ioExecutor))
-                .map(new PathLoaderTask())
-                .observeOn(Schedulers.from(this.computationExecutor))// TODO is it necessary?
-                .subscribe(d->Observable.fromStream(d.getPDFFiles().stream())
-                        .observeOn(Schedulers.from(this.ioExecutor))
-                        .map(new DocumentLoaderTask())
-                        .observeOn(Schedulers.from(this.computationExecutor))
-                        .map(new DocumentSplitterTask())
-                        .flatMap(pgs->Observable.fromStream(pgs.stream()))
-                        .map(new WordCountingTask(d.getStopwords()))
-                        .map(new WordEnqueueingTask(wordCounter))
-                        .sample(MILLIS_BETWEEN_FRAMES, TimeUnit.MILLISECONDS)
-                        .subscribe(
-                                new UpdateConsumerTask(this.view),
-                                System.out::println,
-                                new ComputationEndTask(this.view))
-                );
+        this.currentFlowable.ifPresent(Disposable::dispose);
+        this.currentFlowable = Optional.of(
+            Flowable.switchOnNext(
+                Flowable.zip(
+                    Flowable.just(filesDirectory)
+                            .observeOn(Schedulers.io())
+                            .flatMapStream(new PathLoaderTask())
+                            .compose(FlowableTransformers.valve(this.valves.get(PathLoaderTask.class)))
+                            .map(new DocumentLoaderTask())
+                            .compose(FlowableTransformers.valve(this.valves.get(DocumentLoaderTask.class)))
+                            .flatMapStream(new DocumentSplitterTask())
+                            .compose(FlowableTransformers.valve(this.valves.get(DocumentSplitterTask.class))),
+                    Flowable.just(stopwordsFile)
+                            .observeOn(Schedulers.io())
+                            .map(Files::readAllLines)
+                            .observeOn(Schedulers.computation())
+                            .map(HashSet::new)
+                            .repeat(),
+                    new WordCounterTask()
+                )
+                .compose(FlowableTransformers.valve(this.valves.get(WordCounterTask.class)))
+                .scan(new WordAggregatorTask())
+                .compose(FlowableTransformers.valve(this.valves.get(WordAggregatorTask.class)))
+                .observeOn(Schedulers.single())
+                .window(MILLIS_BETWEEN_FRAMES, TimeUnit.MILLISECONDS)
+            )
+            .map(new UpdateProjectorTask(wordsNumber))
+            .compose(FlowableTransformers.valve(this.valves.get(UpdateProjectorTask.class)))
+            .subscribeOn(Schedulers.computation())
+            .subscribe(new UpdateConsumerTask(this.view), System.err::println, new ComputationEndTask(this.view)));
     }
 
     @Override
     public void suspend() {
-        //this.executorList.forEach(PausableExecutor::pause);
-        //valve.onNext(false);
-        this.flag.setSuspended();
+        this.changeValveState(false);
     }
 
     @Override
     public void resume() {
-        //this.executorList.forEach(PausableExecutor::resume);
-        //valve.onNext(true);
-        this.flag.setRunning();
+        this.changeValveState(true);
     }
 
     @Override
     public void exit() {
         System.exit(0);
+    }
+
+    /*
+     * Changes the state of the Flowable used as a valve deciding whether or not to resume the flow given the boolean parameter
+     * passed.
+     */
+    private void changeValveState(final boolean resume) {
+        ForkJoinPool.commonPool().submit(() -> this.valves.values().forEach(v -> v.onNext(resume)));
     }
 }
