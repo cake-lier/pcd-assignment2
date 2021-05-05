@@ -226,7 +226,7 @@ trait TrainsAPI {
    *  @param trainCode the [[TrainCode]] for the [[Train]] to monitor
    *  @return the real-time information about a [[Train]]
    */
-  def getTrainInfo(trainCode: TrainCode): Future[TrainInfo]
+  def getRealTimeTrainInfo(trainCode: TrainCode): Future[TrainInfo]
 
   /** Returns the real-time information about a [[Station]] given its identifying [[StationName]].
    *
@@ -235,5 +235,5 @@ trait TrainsAPI {
    *  @param stationName the [[StationName]] for the [[Station]] to monitor
    *  @return the real-time information about a [[Station]]
    */
-  def getStationInfo(stationName: StationName): Future[StationInfo]
+  def getRealTimeStationInfo(stationName: StationName): Future[StationInfo]
 }

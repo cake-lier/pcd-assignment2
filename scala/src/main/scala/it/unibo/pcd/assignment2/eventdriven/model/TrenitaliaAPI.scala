@@ -69,7 +69,7 @@ object TrenitaliaAPI {
     private val viaggiatrenoHost = "www.viaggiatreno.it"
     private val viaggiatrenoAPI = "/viaggiatrenonew/resteasy/viaggiatreno/"
 
-    override def getTrainInfo(trainCode: TrainCode): Future[TrainInfo] = {
+    override def getRealTimeTrainInfo(trainCode: TrainCode): Future[TrainInfo] = {
       val noTrainFoundMessage = "Il codice treno non è stato trovato"
       webClient.get(viaggiatrenoHost,s"${viaggiatrenoAPI}cercaNumeroTreno/$trainCode")
                .compose(r =>
@@ -83,7 +83,7 @@ object TrenitaliaAPI {
                .compose(r => Future.succeededFuture(TrainInfoParser(r)))
     }
 
-    override def getStationInfo(stationName: StationName): Future[StationInfo] = {
+    override def getRealTimeStationInfo(stationName: StationName): Future[StationInfo] = {
       val stationPath = s"/vt_pax_internet/mobile/stazione"
       val stationCodeFormFieldName = "codiceStazione"
       val noStationFoundMessage = "La stazione non è stata trovata"

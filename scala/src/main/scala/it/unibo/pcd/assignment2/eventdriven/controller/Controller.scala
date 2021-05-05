@@ -119,12 +119,12 @@ object Controller {
     })
 
     override def startTrainInfoUpdates(trainCode: String): Unit =
-      model.foreach(m => startUpdates(trainCode, m.getTrainInfo, view.displayTrainInfo, view.suspendTrainMonitoring))
+      model.foreach(m => startUpdates(trainCode, m.getRealTimeTrainInfo, view.displayTrainInfo, view.suspendTrainMonitoring))
 
     override def stopTrainInfoUpdates(trainCode: String): Unit = stopUpdates(trainCode)
 
     override def startStationInfoUpdates(stationName: String): Unit =
-      model.foreach(m => startUpdates(stationName, m.getStationInfo, view.displayStationInfo, view.suspendStationMonitoring))
+      model.foreach(m => startUpdates(stationName, m.getRealTimeStationInfo, view.displayStationInfo, view.suspendStationMonitoring))
 
     override def stopStationInfoUpdates(stationName: String): Unit = stopUpdates(stationName)
 
