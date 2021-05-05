@@ -82,6 +82,7 @@ public class ControllerImpl implements Controller {
                 .compose(FlowableTransformers.valve(this.valves.get(WordAggregatorTask.class)))
                 .observeOn(Schedulers.single())
                 .window(MILLIS_BETWEEN_FRAMES, TimeUnit.MILLISECONDS)
+                .map(p -> p.lastElement().toFlowable())
             )
             .map(new UpdateProjectorTask(wordsNumber))
             .compose(FlowableTransformers.valve(this.valves.get(UpdateProjectorTask.class)))
