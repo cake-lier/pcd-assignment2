@@ -77,6 +77,7 @@ public class ControllerImpl implements Controller {
                             .repeat(),
                     new WordCounterTask()
                 )
+                .observeOn(Schedulers.computation())
                 .compose(FlowableTransformers.valve(this.valves.get(WordCounterTask.class)))
                 .scan(new WordAggregatorTask())
                 .compose(FlowableTransformers.valve(this.valves.get(WordAggregatorTask.class)))
@@ -84,9 +85,10 @@ public class ControllerImpl implements Controller {
                 .window(MILLIS_BETWEEN_FRAMES, TimeUnit.MILLISECONDS)
                 .map(p -> p.lastElement().toFlowable())
             )
+            .observeOn(Schedulers.single())
             .map(new UpdateProjectorTask(wordsNumber))
             .compose(FlowableTransformers.valve(this.valves.get(UpdateProjectorTask.class)))
-            .subscribeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.single())
             .subscribe(new UpdateConsumerTask(this.view), System.err::println, new ComputationEndTask(this.view)));
     }
 
